@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCC</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <style>
+        .scrolling-touch { -webkit-overflow-scrolling: touch; }
+        .drag-over { border: 2px dashed #4a5568; }
+        body { background-color: black; color: white; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+       const initialSetOptions = ['ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'EB01', 'OP07', 'OP08', 'PRB', 'PROMO', 'DON', 'PROMO NON NUMERATE'];
+        const versionOptions = ['V1', 'V2', 'V3'];
+        const languageOptions = ['ENG', 'JAP', 'CHI'];
+        const colorOptions = [
+            { name: 'ROSSO', value: 'bg-red-500' },
+            { name: 'AZZURRO', value: 'bg-blue-500' },
+            { name: 'VERDE', value: 'bg-green-500' },
+            { name: 'VIOLA', value: 'bg-purple-500' },
+            { name: 'NERO', value: 'bg-gray-700' },
+            { name: 'GIALLO', value: 'bg-yellow-400' }
+        ];
+
+       const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setOptions, onAddCustomSet }) => {
+    const [isAddingCustomSet, setIsAddingCustomSet] = React.useState(false);
+    const [customSet, setCustomSet] = React.useState('');
+    const [imageLink, setImageLink] = React.useState('');
+    const [previewImage, setPreviewImage] = React.useState(null);
+
+    React.useEffect(() => {
+        if (card.image) {
+            setPreviewImage(card.image);
+        }
+    }, [card.image]);
+
+    const handleSetChange = (e) => {
+        const value = e.target.value;
+        if (value === 'add_custom') {
+            setIsAddingCustomSet(true);
+        } else {
+            onInputChange(e);
+        }
+    };
+
+    const handleCustomSetSubmit = () => {
+        if (customSet.trim() !== '') {
+            onAddCustomSet(customSet.trim());
+            onInputChange({ target: { name: 'set', value: customSet.trim() } });
+            setIsAddingCustomSet(false);
+            setCustomSet('');
+        }
+    };
+
+    const handleImageLinkChange = (e) => {
+        setImageLink(e.target.value);
+    };
+
+    const handleImageLinkSubmit = () => {
+        if (imageLink.trim() !== '') {
+            setPreviewImage(imageLink.trim());
+            onImageChange({ target: { type: 'url', value: imageLink.trim() } });
+            setImageLink('');
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+                onImageChange({ target: { type: 'file', value: reader.result } });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setPreviewImage(null);
+        onImageChange({ target: { type: 'remove' } });
+    };
+
+   return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label className="block mb-1 text-white">Nome Carta</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={card.name}
+                            onChange={onInputChange}
+                            className="w-full px-3 py-2 border rounded text-black"
+                            placeholder="Nome della carta"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1 text-white">Set</label>
+                        {isAddingCustomSet ? (
+                            <div className="flex">
+                                <input
+                                    type="text"
+                                    value={customSet}
+                                    onChange={(e) => setCustomSet(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-l text-black"
+                                    placeholder="Nuovo set"
+                                />
+                                <button
+                                    onClick={handleCustomSetSubmit}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600"
+                                >
+                                    Aggiungi
+                                </button>
+                            </div>
+                        ) : (
+                            <select
+                                name="set"
+                                value={card.set}
+                                onChange={handleSetChange}
+                                className="w-full px-3 py-2 border rounded text-black"
+                            >
+                                <option value="">Seleziona un set</option>
+                                {setOptions.filter(set => set !== 'ALL').map((option) => (
+                                    <option key={option} value={option}>{option}</option>
+                                ))}
+                                <option value="add_custom">Aggiungi altro...</option>
+                            </select>
+                        )}
+                    </div>
+                <div>
+                    <label className="block mb-1 text-white">Numero Carta</label>
+                    <input
+                        type="text"
+                        name="cardNumber"
+                        value={card.cardNumber}
+                        onChange={onInputChange}
+                        className="w-full px-3 py-2 border rounded text-black"
+                        placeholder="Numero della carta"
+                    />
+                </div>
+                <div>
+                    <label className="block mb-1 text-white">Versione</label>
+                    <select
+                        name="version"
+                        value={card.version}
+                        onChange={onInputChange}
+                        className="w-full px-3 py-2 border rounded text-black"
+                    >
+                        <option value="">Seleziona una versione</option>
+                        {versionOptions.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
+                </div>
+                <div>
+                    <label className="block mb-1 text-white">Lingua</label>
+                    <select
+                        name="language"
+                        value={card.language}
+                        onChange={onInputChange}
+                        className="w-full px-3 py-2 border rounded text-black"
+                    >
+                        {languageOptions.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
+                </div>
+               <div className="col-span-1 sm:col-span-2">
+                <label className="block mb-1 text-white">Immagine Carta</label>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <div className="flex-1 w-full">
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
+                            className="w-full px-3 py-2 border rounded text-white"
+                            accept="image/*"
+                        />
+                    </div>
+                    <div className="flex-1 w-full">
+                        <div className="flex">
+                            <input
+                                type="text"
+                                value={imageLink}
+                                onChange={handleImageLinkChange}
+                                className="w-full px-3 py-2 border rounded-l text-black"
+                                placeholder="Incolla il link dell'immagine"
+                            />
+                            <button
+                                onClick={handleImageLinkSubmit}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600"
+                            >
+                                Aggiungi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {previewImage && (
+                <div className="col-span-1 sm:col-span-2 mt-4 flex items-center">
+                    <div className="relative w-24 h-24 mr-4">
+                        <img
+                            src={previewImage}
+                            alt="Anteprima"
+                            className="absolute top-0 left-0 w-full h-full object-cover border rounded"
+                        />
+                        <button
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 text-xs"
+                            style={{ width: '20px', height: '20px', lineHeight: '1' }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <span className="text-white text-sm">Immagine selezionata</span>
+                </div>
+            )}
+                <div className="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="missing"
+                        name="missing"
+                        checked={card.missing}
+                        onChange={onInputChange}
+                        className="mr-2"
+                    />
+                    <label htmlFor="missing" className="text-white">Manca</label>
+                </div>
+                <div>
+                    <label className="block mb-1 text-white">Colore</label>
+                    <div className="flex space-x-2">
+                        {colorOptions.map((color) => (
+                            <button
+                                key={color.value}
+                                className={`w-8 h-8 rounded-full ${color.value} ${card.color === color.value ? 'ring-2 ring-offset-2 ring-white' : ''}`}
+                                onClick={() => onInputChange({ target: { name: 'color', value: color.value } })}
+                            />
+                        ))}
+                    </div>
+                </div>
+                    <div className="col-span-1 sm:col-span-2 flex justify-end space-x-2">
+                        <button onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded">Annulla</button>
+                        <button onClick={onSubmit} className="px-4 py-2 bg-blue-500 text-white rounded">
+                            {card.id ? 'Aggiorna' : 'Aggiungi'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const ExportDialog = ({ isOpen, onClose, onExport }) => {
+            const [fileName, setFileName] = React.useState('');
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                        <h2 className="text-xl font-bold mb-4">Esporta Collezione</h2>
+                        <input
+                            type="text"
+                            value={fileName}
+                            onChange={(e) => setFileName(e.target.value)}
+                            placeholder="Nome del file (senza estensione)"
+                            className="w-full px-3 py-2 mb-4 border rounded text-black"
+                        />
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                            >
+                                Annulla
+                            </button>
+                            <button
+                                onClick={() => onExport(fileName)}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Esporta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+      const CardCollectionApp = () => {
+        
+      const [currentPage, setCurrentPage] = React.useState(1);
+    const cardsPerPage = 20; // Numero di carte per pagina
+    const [cards, setCards] = React.useState([]);
+    const [newCard, setNewCard] = React.useState({
+        id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: ''
+    });
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+    const [activeSet, setActiveSet] = React.useState('ALL');
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [isFormVisible, setIsFormVisible] = React.useState(false);
+    const [setOptions, setSetOptions] = React.useState(initialSetOptions);
+    const [loadedFileName, setLoadedFileName] = React.useState(null);
+    const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false);
+    
+const [showMissingOnly, setShowMissingOnly] = React.useState(false);
+    const [showNonV1Only, setShowNonV1Only] = React.useState(false);
+    
+    
+    React.useEffect(() => {
+    const handleKeyPress = (event) => {
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        switch (event.key.toLowerCase()) {
+            case 'n':
+                setIsFormVisible(true);
+                break;
+            case 'l':
+                document.getElementById('excelUpload').click();
+                break;
+            case 'm':
+                setShowMissingOnly(prev => !prev);
+                break;
+            default:
+                break;
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+        window.removeEventListener('keydown', handleKeyPress);
+    };
+}, []);
+    
+    
+
+            const handleFileUpload = (event) => {
+              const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        const formattedCards = jsonData.map(card => ({
+                            id: card.id || Date.now(),
+                            name: card.name || '',
+                            set: card.set || '',
+                            cardNumber: card.cardNumber || '',
+                            version: card.version || '',
+                            language: card.language || 'ENG',
+                            image: card.image || null,
+                            missing: card.missing || false,
+                            color: card.color || ''
+                        }));
+
+                        setCards(formattedCards);
+                        
+                        // Update setOptions with any new sets from the Excel file
+                        const newSets = [...new Set(formattedCards.map(card => card.set))];
+                        setSetOptions(prevSets => [...new Set([...prevSets, ...newSets])]);
+
+                        setLoadedFileName(file.name);
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            };
+
+            const handleExcelExport = (fileName) => {
+                const worksheet = XLSX.utils.json_to_sheet(cards);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Cards");
+                XLSX.writeFile(workbook, `${fileName || 'card_collection'}.xlsx`);
+                setIsExportDialogOpen(false);
+            };
+
+            const handleFileEject = () => {
+                 setCards([]);
+                setSetOptions(initialSetOptions);
+                setLoadedFileName(null);
+            };
+
+          React.useEffect(() => {
+                const savedCards = localStorage.getItem('cardCollection');
+                const savedSets = localStorage.getItem('customSets');
+                if (savedCards) {
+                    setCards(JSON.parse(savedCards));
+                }
+                if (savedSets) {
+                    setSetOptions([...initialSetOptions, ...JSON.parse(savedSets)]);
+                }
+            }, []);
+
+            React.useEffect(() => {
+                localStorage.setItem('cardCollection', JSON.stringify(cards));
+            }, [cards]);
+
+            React.useEffect(() => {
+                const customSets = setOptions.filter(set => !initialSetOptions.includes(set));
+                localStorage.setItem('customSets', JSON.stringify(customSets));
+            }, [setOptions]);
+
+            const handleInputChange = (e) => {
+                const { name, value, type, checked } = e.target;
+                setNewCard(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+            };
+
+       const handleImageChange = (e) => {
+        if (e.target.type === 'file' || e.target.type === 'url') {
+            setNewCard(prev => ({ ...prev, image: e.target.value }));
+        } else if (e.target.type === 'remove') {
+            setNewCard(prev => ({ ...prev, image: null }));
+        }
+    };
+
+
+          const addOrUpdateCard = () => {
+    if (newCard.name.trim() !== '') {
+        let updatedCards;
+        if (newCard.id) {
+            updatedCards = cards.map(card => card.id === newCard.id ? newCard : card);
+        } else {
+            updatedCards = [...cards, { ...newCard, id: Date.now() }];
+        }
+      
+        // Definire l'ordine dei set
+        const setOrder = [
+            'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'EB01', 'OP07', 'OP08', 'PRB', 'PROMO', 'DON', 'PROMO NON NUMERATE'
+        ];
+
+        updatedCards.sort((a, b) => {
+            // 1. Ordinare per set
+            const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
+            if (setOrderDiff !== 0) return setOrderDiff;
+
+            // 2. Se stesso set, ordinare per colore
+            const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
+            if (colorOrder !== 0) return colorOrder;
+
+            // 3. Se stesso colore, ordinare per numero carta
+            return parseInt(a.cardNumber) - parseInt(b.cardNumber);
+        });
+        
+        setCards(updatedCards);
+        setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
+        setIsEditDialogOpen(false);
+        setIsFormVisible(false);
+    }
+};
+
+                    
+       
+
+            const editCard = (card) => {
+                setNewCard(card);
+                setIsEditDialogOpen(true);
+            };
+
+            const deleteCard = (id) => {
+                setCards(cards.filter(card => card.id !== id));
+            };
+
+            const addCustomSet = (newSet) => {
+                if (!setOptions.includes(newSet)) {
+                    setSetOptions(prev => [...prev, newSet]);
+                }
+            };
+            
+              const getFlagEmoji = (language) => {
+                switch (language) {
+                    case 'JAP': return '🇯🇵';
+                    case 'CHI': return '🇨🇳';
+                    default: return '';
+                }
+            };
+            
+   const filteredCards = cards.filter(card => 
+        (activeSet === 'ALL' || card.set === activeSet) &&
+        (card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (!showMissingOnly || card.missing) &&
+        (!showNonV1Only || card.version !== 'V1')
+    );
+
+    const indexOfLastCard = currentPage * cardsPerPage;
+    const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+    const currentCards = filteredCards.slice(indexOfFirstCard, indexOfLastCard);
+    const totalPages = Math.ceil(filteredCards.length / cardsPerPage);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const CardGrid = ({ cards }) => (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {cards.map((card) => (
+            <div 
+                key={card.id} 
+                className={`relative ${card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
+                            ${card.missing ? 'grayscale hover:grayscale-0' : ''}`}
+                style={{
+                    boxShadow: card.missing ? '0 0 0 2px red' : 'none'
+                }}
+            >
+                <div className="relative pt-[100%] w-full mt-4">
+                    {card.image && (
+                        <img 
+                            src={card.image} 
+                            alt={card.name} 
+                            className="absolute top-0 left-0 w-full h-full object-contain"
+                        />
+                    )}
+                </div>
+                <div className="p-4 flex-grow">
+                    <h3 className="font-bold text-lg mb-2 text-white text-shadow">
+                        {card.name.toUpperCase()} {card.version} {getFlagEmoji(card.language)}
+                    </h3>
+                    <p className="text-sm text-white text-shadow">{card.set} - {card.cardNumber}</p>
+                </div>
+                {card.missing && (
+                    <p className="text-sm font-bold text-red-500 bg-white px-2 py-1 rounded absolute top-2 right-2 z-10">
+                        MANCA
+                    </p>
+                )}
+                <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
+                    <button onClick={() => editCard(card)} className="text-white mr-2 hover:text-blue-300 text-shadow">Edit</button>
+                    <button onClick={() => deleteCard(card.id)} className="text-white hover:text-red-300 text-shadow">Delete</button>
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+
+    const Pagination = ({ currentPage, totalPages, paginate }) => (
+        <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className={`px-3 py-1 rounded ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                >
+                    {number}
+                </button>
+            ))}
+        </div>
+    );
+    
+
+    return (
+        <div className="container mx-auto p-4">
+         <style jsx global>{`
+                .grayscale {
+                    filter: grayscale(100%);
+                }
+                .grayscale:hover {
+                    filter: grayscale(0%);
+                }
+                
+                 .text-shadow {
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+                }
+            `}</style>
+           <h1 className="text-3xl font-bold mb-6 text-white text-shadow">OP CARD COLLECTION</h1>
+                    <div className="mb-4 flex flex-wrap gap-2">
+                       <button 
+    onClick={() => setIsFormVisible(!isFormVisible)}
+    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+>
+    {isFormVisible ? 'Nascondi Form' : 'Aggiungi Nuova Carta (N)'}
+</button>
+                      <label className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
+    {loadedFileName ? 'Cambia File (L)' : 'Carica Excel (L)'}
+    <input id="excelUpload" type="file" onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
+</label>
+                        <button 
+                            onClick={() => setIsExportDialogOpen(true)}
+                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                        >
+                            Esporta in Excel
+                        </button>
+                        {loadedFileName && (
+                            <button 
+                                onClick={handleFileEject}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                            >
+                                Espelli File
+                            </button>
+                        )}
+                    </div>
+                    {loadedFileName && (
+                        <p className="mb-4 text-white">File caricato: {loadedFileName}</p>
+                    )}
+                  {isFormVisible && (
+                        <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
+                            <h2 className="text-xl font-semibold mb-4 text-white">Aggiungi Nuova Carta</h2>
+                            <CardForm 
+                                card={newCard}
+                onInputChange={handleInputChange}
+                onImageChange={handleImageChange}
+                onSubmit={addOrUpdateCard}
+                onAddCustomSet={addCustomSet}
+                setOptions={setOptions}
+                onCancel={() => {
+                    setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
+                    setIsFormVisible(false);
+                }}
+                            />
+                        </div>
+                    )}
+                    <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Cerca carta per nome o numero..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border rounded text-black mb-2"
+                />
+                <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="showMissingOnly"
+                            checked={showMissingOnly}
+                            onChange={(e) => setShowMissingOnly(e.target.checked)}
+                            className="mr-2"
+                        />
+                      <label htmlFor="showMissingOnly" className="text-white">
+    Mostra solo carte mancanti (M)
+</label>
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="showNonV1Only"
+                            checked={showNonV1Only}
+                            onChange={(e) => setShowNonV1Only(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="showNonV1Only" className="text-white">
+                            Alternative 
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div className="mb-4 overflow-x-auto scrolling-touch">
+                <div className="flex whitespace-nowrap">
+                    {setOptions.map((set) => (
+                        <button
+                            key={set}
+                            onClick={() => setActiveSet(set)}
+                            className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                        >
+                            {set}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <CardGrid cards={currentCards} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
+                    {isEditDialogOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl">
+                                <h2 className="text-2xl font-bold mb-4 text-white">Modifica Carta</h2>
+                                <CardForm 
+                                    card={newCard} 
+                                    onInputChange={handleInputChange}
+                                    onImageChange={handleImageChange}
+                                    onSubmit={addOrUpdateCard}
+                                    onAddCustomSet={addCustomSet}
+                                    setOptions={setOptions}
+                                    onCancel={() => setIsEditDialogOpen(false)} 
+                                />
+                            </div>
+                        </div>
+                    )}
+                    <ExportDialog
+                        isOpen={isExportDialogOpen}
+                        onClose={() => setIsExportDialogOpen(false)}
+                        onExport={handleExcelExport}
+                    />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<CardCollectionApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
