@@ -306,6 +306,7 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
 
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                
                     <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
                         <h2 className="text-xl font-bold mb-4">Esporta Collezione</h2>
                         <input
@@ -394,7 +395,10 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
       const CardCollectionApp = () => {
 
-
+const [theme, setTheme] = React.useState('standard');
+const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'standard' ? 'pink' : 'standard');
+};
   const [selectedCard, setSelectedCard] = React.useState(null);
       const [currentPage, setCurrentPage] = React.useState(1);
     const cardsPerPage = 20; // Numero di carte per pagina
@@ -415,6 +419,10 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     
       const [showSpecialOnly, setShowSpecialOnly] = React.useState(false);
     const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
+    
+    React.useEffect(() => {
+    document.body.style.backgroundColor = theme === 'standard' ? 'black' : '#FFC0CB';
+}, [theme]);
     
     React.useEffect(() => {
     const handleKeyPress = (event) => {
@@ -633,9 +641,9 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                 </div>
                 <div className="p-4 flex-grow">
                     <h3 className="font-bold text-lg mb-2 text-white text-shadow">
-                        {card.name.toUpperCase()} {card.version} {getFlagEmoji(card.language)}
+                        {card.name.toUpperCase()} ({card.version}) {getFlagEmoji(card.language)}
                     </h3>
-                    <p className="text-sm text-white text-shadow">{card.set} - {card.cardNumber}</p>
+                    <p className="text-sm text-white text-shadow">({card.set} - {card.cardNumber})</p>
                 </div>
                 {card.missing && (
                     <p className="text-sm font-bold text-red-500 bg-white px-2 py-1 rounded absolute top-2 right-2 z-10">
@@ -709,11 +717,23 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
                 }
             `}</style>
-           <h1 className="text-3xl font-bold mb-6 text-white text-shadow">OP CARD COLLECTION</h1>
+           <h1 className={`text-3xl font-bold mb-6 ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>OP CARD COLLECTION</h1>
+
+           <div className="mb-4">
+    <label className={`mr-2 text-xs ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>Tema:</label>
+    <select 
+        value={theme} 
+        onChange={toggleTheme}
+        className="px-1 py-1 text-xs rounded text-black"
+    >
+        <option value="standard">Standard</option>
+        <option value="pink">Rosa</option>
+    </select>
+</div>
                     <div className="mb-4 flex flex-wrap gap-2">
                        <button 
     onClick={() => setIsFormVisible(!isFormVisible)}
-    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    className={`px-4 py-2 ${theme === 'standard' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-pink-500 hover:bg-pink-600'} text-white rounded transition-colors`}
 >
     {isFormVisible ? 'Nascondi Form' : 'Aggiungi (N)'}
 </button>
@@ -839,7 +859,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                 onEditCard={handleEditCard}
                 onDeleteCard={deleteCard}
             />
-            
+            <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
             {selectedCard && (
                 <CardDetails card={selectedCard} onClose={handleCloseCardDetails} />
             )}
