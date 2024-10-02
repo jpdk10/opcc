@@ -19,7 +19,14 @@
     <div id="root"></div>
 
     <script type="text/babel">
-       const initialSetOptions = ['ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'EB01', 'OP07', 'OP08', 'PRB', 'PROMO', 'DON', 'PROMO NON NUMERATE'];
+
+
+
+       const initialSetOptions = [ 'ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
+        'EPB01', 'PRB01', 'ST01', 'ST02', 'ST03', 'ST04', 'ST05', 'ST06', 'ST07', 'ST08', 
+        'ST09', 'ST10', 'ST11', 'ST12', 'ST13', 'Promo', 'Unnumbered Promo', 'Judge Promo', 
+        'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
+    ];
         const versionOptions = ['V1', 'V2', 'V3'];
         const languageOptions = ['ENG', 'JAP', 'CHI'];
         const colorOptions = [
@@ -31,7 +38,7 @@
             { name: 'GIALLO', value: 'bg-yellow-400' }
         ];
 
-       const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setOptions, onAddCustomSet }) => {
+const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setOptions, onAddCustomSet }) => {
     const [isAddingCustomSet, setIsAddingCustomSet] = React.useState(false);
     const [customSet, setCustomSet] = React.useState('');
     const [imageLink, setImageLink] = React.useState('');
@@ -122,20 +129,22 @@
                                 </button>
                             </div>
                         ) : (
-                            <select
-                                name="set"
-                                value={card.set}
-                                onChange={handleSetChange}
-                                className="w-full px-3 py-2 border rounded text-black"
-                            >
-                                <option value="">Seleziona un set</option>
-                                {setOptions.filter(set => set !== 'ALL').map((option) => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                                <option value="add_custom">Aggiungi altro...</option>
-                            </select>
-                        )}
-                    </div>
+                          <select
+            name="set"
+            value={card.set}
+            onChange={handleSetChange}
+            className="w-full px-3 py-2 border rounded text-black"
+          >
+            <option value="">Seleziona un set</option>
+            {setOptions.filter(set => set !== 'ALL').map((option) => (
+              <option key={option} value={option}>
+                {getSetIcon(option)} {option}
+              </option>
+            ))}
+            <option value="add_custom">Aggiungi altro...</option>
+          </select>
+        )}
+      </div>
                 <div>
                     <label className="block mb-1 text-white">Numero Carta</label>
                     <input
@@ -223,17 +232,51 @@
                     <span className="text-white text-sm">Immagine selezionata</span>
                 </div>
             )}
-                <div className="flex items-center">
-                    <input
-                        type="checkbox"
-                        id="missing"
-                        name="missing"
-                        checked={card.missing}
-                        onChange={onInputChange}
-                        className="mr-2"
-                    />
-                    <label htmlFor="missing" className="text-white">Manca</label>
-                </div>
+                 <div className="flex items-center">
+                <input
+                    type="checkbox"
+                    id="missing"
+                    name="missing"
+                    checked={card.missing}
+                    onChange={onInputChange}
+                    className="mr-2"
+                />
+                <label htmlFor="missing" className="text-white mr-4">Manca</label>
+
+                <input
+                    type="checkbox"
+                    id="special"
+                    name="special"
+                    checked={card.special}
+                    onChange={onInputChange}
+                    className="mr-2"
+                />
+                <label htmlFor="special" className="text-white mr-4">Special</label>
+
+                <input
+                    type="checkbox"
+                    id="favorite"
+                    name="favorite"
+                    checked={card.favorite}
+                    onChange={onInputChange}
+                    className="mr-2"
+                />
+                <label htmlFor="favorite" className="text-white flex items-center">
+                    Preferiti <span className="ml-1">⭐</span>
+                </label>
+            </div>
+
+                <div className="col-span-1 sm:col-span-2">
+    <label className="block mb-1 text-white">Note</label>
+    <textarea
+        name="notes"
+        value={card.notes}
+        onChange={onInputChange}
+        className="w-full px-3 py-2 border rounded text-black"
+        placeholder="Inserisci eventuali note sulla carta"
+        rows="3"
+    />
+</div>
                 <div>
                     <label className="block mb-1 text-white">Colore</label>
                     <div className="flex space-x-2">
@@ -290,15 +333,75 @@
                 </div>
             );
         };
+const getSetIcon = (set) => {
+  if (['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'EPB01', 'PRB01'].includes(set)) {
+    return '🔴'; // Icona rossa
+  } else if (set.startsWith('ST')) {
+    return '🔵'; // Icona blu
+  } else if (['Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'].includes(set)) {
+    return '⚪'; // Icona pallino bianco
+  }
+  return '';
+};
+
+const CardDetailPopup = ({ card, onClose, onSave }) => {
+  const [notes, setNotes] = useState(card.notes || '');
+
+  const handleSave = () => {
+    onSave({ ...card, notes });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-2xl">
+        <h2 className="text-2xl font-bold mb-4 text-white">{card.name}</h2>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <p className="text-white"><strong>Set:</strong> {card.set}</p>
+          <p className="text-white"><strong>Numero:</strong> {card.cardNumber}</p>
+          <p className="text-white"><strong>Versione:</strong> {card.version}</p>
+          <p className="text-white"><strong>Lingua:</strong> {card.language}</p>
+          <p className="text-white"><strong>Mancante:</strong> {card.missing ? 'Sì' : 'No'}</p>
+          <div className={`w-8 h-8 rounded-full ${card.color}`}></div>
+        </div>
+        {card.image && (
+          <img src={card.image} alt={card.name} className="w-full max-h-64 object-contain mb-4" />
+        )}
+        <div className="mb-4">
+          <label className="block text-white mb-2">Note:</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full px-3 py-2 text-black rounded"
+            rows="4"
+          ></textarea>
+        </div>
+        <div className="flex justify-end space-x-2">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+            Chiudi
+          </button>
+          <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Salva
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 
       const CardCollectionApp = () => {
-        
+
+
+  const [selectedCard, setSelectedCard] = React.useState(null);
       const [currentPage, setCurrentPage] = React.useState(1);
     const cardsPerPage = 20; // Numero di carte per pagina
     const [cards, setCards] = React.useState([]);
-    const [newCard, setNewCard] = React.useState({
-        id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: ''
-    });
+const [newCard, setNewCard] = React.useState({
+    id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '', notes: '', special: false, favorite: false
+});
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [activeSet, setActiveSet] = React.useState('ALL');
     const [searchTerm, setSearchTerm] = React.useState('');
@@ -310,6 +413,8 @@
 const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     const [showNonV1Only, setShowNonV1Only] = React.useState(false);
     
+      const [showSpecialOnly, setShowSpecialOnly] = React.useState(false);
+    const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
     
     React.useEffect(() => {
     const handleKeyPress = (event) => {
@@ -424,39 +529,43 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     };
 
 
-          const addOrUpdateCard = () => {
-    if (newCard.name.trim() !== '') {
-        let updatedCards;
-        if (newCard.id) {
-            updatedCards = cards.map(card => card.id === newCard.id ? newCard : card);
-        } else {
-            updatedCards = [...cards, { ...newCard, id: Date.now() }];
-        }
+     // Modifica la funzione di ordinamento
+    const addOrUpdateCard = () => {
+        if (newCard.name.trim() !== '') {
+            let updatedCards;
+            if (newCard.id) {
+                updatedCards = cards.map(card => card.id === newCard.id ? newCard : card);
+            } else {
+                updatedCards = [...cards, { ...newCard, id: Date.now() }];
+            }
       
         // Definire l'ordine dei set
-        const setOrder = [
-            'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'EB01', 'OP07', 'OP08', 'PRB', 'PROMO', 'DON', 'PROMO NON NUMERATE'
-        ];
+             const setOrder = [
+                'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
+                'EPB01', 'PRB01', 
+                'ST01', 'ST02', 'ST03', 'ST04', 'ST05', 'ST06', 'ST07', 'ST08', 'ST09', 'ST10', 'ST11', 'ST12', 'ST13', 
+                'Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
+            ];
 
-        updatedCards.sort((a, b) => {
-            // 1. Ordinare per set
-            const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
-            if (setOrderDiff !== 0) return setOrderDiff;
+            updatedCards.sort((a, b) => {
+                // 1. Ordinare per set
+                const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
+                if (setOrderDiff !== 0) return setOrderDiff;
 
-            // 2. Se stesso set, ordinare per colore
-            const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
-            if (colorOrder !== 0) return colorOrder;
+                // 2. Se stesso set, ordinare per colore
+                const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
+                if (colorOrder !== 0) return colorOrder;
 
-            // 3. Se stesso colore, ordinare per numero carta
-            return parseInt(a.cardNumber) - parseInt(b.cardNumber);
-        });
+                // 3. Se stesso colore, ordinare per numero carta
+                return parseInt(a.cardNumber) - parseInt(b.cardNumber);
+            });
         
-        setCards(updatedCards);
-        setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
-        setIsEditDialogOpen(false);
-        setIsFormVisible(false);
-    }
-};
+            setCards(updatedCards);
+            setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
+            setIsEditDialogOpen(false);
+            setIsFormVisible(false);
+        }
+    };
 
                     
        
@@ -484,12 +593,14 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                 }
             };
             
-   const filteredCards = cards.filter(card => 
+     const filteredCards = cards.filter(card => 
         (activeSet === 'ALL' || card.set === activeSet) &&
         (card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
          card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
         (!showMissingOnly || card.missing) &&
-        (!showNonV1Only || card.version !== 'V1')
+        (!showNonV1Only || card.version !== 'V1') &&
+        (!showSpecialOnly || card.special) &&
+        (!showFavoritesOnly || card.favorite)
     );
 
     const indexOfLastCard = currentPage * cardsPerPage;
@@ -499,16 +610,17 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const CardGrid = ({ cards }) => (
+  const CardGrid = ({ cards, onCardClick, onEditCard, onDeleteCard }) => (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {cards.map((card) => (
             <div 
                 key={card.id} 
                 className={`relative ${card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
-                            ${card.missing ? 'grayscale hover:grayscale-0' : ''}`}
+                            ${card.missing ? 'grayscale hover:grayscale-0' : ''} cursor-pointer`}
                 style={{
                     boxShadow: card.missing ? '0 0 0 2px red' : 'none'
                 }}
+                onClick={() => onCardClick(card)}
             >
                 <div className="relative pt-[100%] w-full mt-4">
                     {card.image && (
@@ -530,9 +642,25 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                         MANCA
                     </p>
                 )}
-                <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
-                    <button onClick={() => editCard(card)} className="text-white mr-2 hover:text-blue-300 text-shadow">Edit</button>
-                    <button onClick={() => deleteCard(card.id)} className="text-white hover:text-red-300 text-shadow">Delete</button>
+                     <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditCard(card);
+                        }} 
+                        className="text-white mr-2 hover:text-blue-300 text-shadow"
+                    >
+                        Edit
+                    </button>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteCard(card.id);
+                        }} 
+                        className="text-white hover:text-red-300 text-shadow"
+                    >
+                        Delete
+                    </button>
                 </div>
             </div>
         ))}
@@ -554,7 +682,19 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
         </div>
     );
     
+ const handleCardClick = (card) => {
+        setSelectedCard(card);
+    };
+    
+    const handleCloseCardDetails = () => {
+        setSelectedCard(null);
+    };
+     const handleEditCard = (card) => {
+        setNewCard(card);
+        setIsEditDialogOpen(true);
+    };
 
+    
     return (
         <div className="container mx-auto p-4">
          <style jsx global>{`
@@ -575,7 +715,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     onClick={() => setIsFormVisible(!isFormVisible)}
     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
 >
-    {isFormVisible ? 'Nascondi Form' : 'Aggiungi Nuova Carta (N)'}
+    {isFormVisible ? 'Nascondi Form' : 'Aggiungi (N)'}
 </button>
                       <label className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
     {loadedFileName ? 'Cambia File (L)' : 'Carica Excel (L)'}
@@ -616,7 +756,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                             />
                         </div>
                     )}
-                    <div className="mb-4">
+                      <div className="mb-4">
                 <input
                     type="text"
                     placeholder="Cerca carta per nome o numero..."
@@ -624,7 +764,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-3 py-2 border rounded text-black mb-2"
                 />
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 flex-wrap">
                     <div className="flex items-center">
                         <input
                             type="checkbox"
@@ -633,9 +773,9 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                             onChange={(e) => setShowMissingOnly(e.target.checked)}
                             className="mr-2"
                         />
-                      <label htmlFor="showMissingOnly" className="text-white">
-    Mostra solo carte mancanti (M)
-</label>
+                        <label htmlFor="showMissingOnly" className="text-white">
+                            Manca (M)
+                        </label>
                     </div>
                     <div className="flex items-center">
                         <input
@@ -649,39 +789,77 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                             Alternative 
                         </label>
                     </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="showSpecialOnly"
+                            checked={showSpecialOnly}
+                            onChange={(e) => setShowSpecialOnly(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="showSpecialOnly" className="text-white">
+                            Special
+                        </label>
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="showFavoritesOnly"
+                            checked={showFavoritesOnly}
+                            onChange={(e) => setShowFavoritesOnly(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="showFavoritesOnly" className="text-white flex items-center">
+                            Preferiti <span className="ml-1">⭐</span>
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div className="mb-4 overflow-x-auto scrolling-touch">
-                <div className="flex whitespace-nowrap">
-                    {setOptions.map((set) => (
-                        <button
-                            key={set}
-                            onClick={() => setActiveSet(set)}
-                            className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
-                        >
-                            {set}
-                        </button>
-                    ))}
+             <div className="mb-6 pt-4 border-2 border-t-amber-400 border-r-0 border-l-0 border-b-0"> {/* Aumentato il margine inferiore */}
+                <div className="overflow-x-auto scrolling-touch mb-2 pb-2"> {/* Aggiunto margine inferiore */}
+                    <div className="flex whitespace-nowrap">
+                        {initialSetOptions.map((set) => (
+                            <button
+                                key={set}
+                                onClick={() => setActiveSet(set)}
+                                className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                            >
+                                {set}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+               
             </div>
-            <CardGrid cards={currentCards} />
-            <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
-                    {isEditDialogOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl">
-                                <h2 className="text-2xl font-bold mb-4 text-white">Modifica Carta</h2>
-                                <CardForm 
-                                    card={newCard} 
-                                    onInputChange={handleInputChange}
-                                    onImageChange={handleImageChange}
-                                    onSubmit={addOrUpdateCard}
-                                    onAddCustomSet={addCustomSet}
-                                    setOptions={setOptions}
-                                    onCancel={() => setIsEditDialogOpen(false)} 
-                                />
-                            </div>
-                        </div>
-                    )}
+
+            {/* Griglia delle carte */}
+           <CardGrid 
+                cards={currentCards} 
+                onCardClick={handleCardClick}
+                onEditCard={handleEditCard}
+                onDeleteCard={deleteCard}
+            />
+            
+            {selectedCard && (
+                <CardDetails card={selectedCard} onClose={handleCloseCardDetails} />
+            )}
+            
+            {isEditDialogOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl">
+                        <h2 className="text-2xl font-bold mb-4 text-white">Modifica Carta</h2>
+                        <CardForm 
+                            card={newCard} 
+                            onInputChange={handleInputChange}
+                            onImageChange={handleImageChange}
+                            onSubmit={addOrUpdateCard}
+                            onAddCustomSet={addCustomSet}
+                            setOptions={setOptions}
+                            onCancel={() => setIsEditDialogOpen(false)} 
+                        />
+                    </div>
+                </div>
+            )}
                     <ExportDialog
                         isOpen={isExportDialogOpen}
                         onClose={() => setIsExportDialogOpen(false)}
@@ -690,6 +868,44 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                 </div>
             );
         };
+        
+     const CardDetails = ({ card, onClose }) => {
+    const handleOutsideClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md"> {/* Ridotto max-w-2xl a max-w-md */}
+                <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2> {/* Ridotto text-2xl a text-xl */}
+                <div className="grid grid-cols-2 gap-2 mb-4 text-sm"> {/* Aggiunto text-sm per ridurre la dimensione del testo */}
+                    <p><span className="font-bold">Set:</span> {card.set}</p>
+                    <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
+                    <p><span className="font-bold">Versione:</span> {card.version}</p>
+                    <p><span className="font-bold">Lingua:</span> {card.language}</p>
+                    <p><span className="font-bold">Mancante:</span> {card.missing ? 'Sì' : 'No'}</p>
+                    <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
+                    <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
+                    <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
+                </div>
+                {card.notes && (
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2 text-white">Note:</h3>
+                        <p className="text-white text-sm">{card.notes}</p>
+                    </div>
+                )}
+                {card.image && (
+                    <img src={card.image} alt={card.name} className="max-w-full h-auto mb-4" />
+                )}
+                <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Chiudi
+                </button>
+            </div>
+        </div>
+    );
+};
 
         ReactDOM.render(<CardCollectionApp />, document.getElementById('root'));
     </script>
