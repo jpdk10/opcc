@@ -434,10 +434,10 @@ const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v
 
 function initClient() {
     gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
-        scope: SCOPES
+        apiKey: 'AIzaSyC4BQ_fAHJSxGjk-aPyBcRI27ESbx5_-bE',
+        clientId: '69632141194-vhq4hbrf2607s0g044m8tg2cv8t19cdv.apps.googleusercontent.com',
+        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+        scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid https://www.googleapis.com/auth/spreadsheets'
     }).then(() => {
         gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
@@ -457,6 +457,13 @@ function handleSignoutClick() {
 }
 
 function saveToGoogleSheets() {
+    // Verifica se l'utente è autenticato
+    if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        console.error('User not signed in. Please authenticate first.');
+        // Qui potresti aggiungere un prompt per l'autenticazione
+        return;
+    }
+
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
     const range = 'Sheet1!A2:L'; // Inizia dalla seconda riga per preservare le intestazioni
 
@@ -485,10 +492,10 @@ function saveToGoogleSheets() {
         valueInputOption: 'USER_ENTERED',
         resource: body
     }).then((response) => {
-        console.log('Data saved to Google Sheets');
+        console.log('Data saved to Google Sheets', response);
         // Qui potresti aggiungere un feedback visuale per l'utente
-    }, (reason) => {
-        console.error('Error: ' + reason.result.error.message);
+    }, (error) => {
+        console.error('Error saving to Google Sheets:', error);
         // Qui potresti mostrare un messaggio di errore all'utente
     });
 }
