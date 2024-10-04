@@ -458,15 +458,16 @@ function handleSignoutClick() {
 
 function saveToGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A:L';
+    const range = 'Sheet1!A2:L'; // Inizia dalla seconda riga per preservare le intestazioni
 
     const values = cards.map(card => [
+        card.id,
         card.name,
         card.set,
         card.cardNumber,
         card.version,
         card.language,
-         card.image,
+        card.image,
         card.missing ? 'Yes' : 'No',
         card.color,
         card.notes,
@@ -481,12 +482,14 @@ function saveToGoogleSheets() {
     gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: spreadsheetId,
         range: range,
-        valueInputOption: 'RAW',
+        valueInputOption: 'USER_ENTERED',
         resource: body
     }).then((response) => {
         console.log('Data saved to Google Sheets');
+        // Qui potresti aggiungere un feedback visuale per l'utente
     }, (reason) => {
         console.error('Error: ' + reason.result.error.message);
+        // Qui potresti mostrare un messaggio di errore all'utente
     });
 }
 
