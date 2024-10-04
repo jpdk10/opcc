@@ -482,34 +482,27 @@ const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v
 const REDIRECT_URI = 'https://jpdk10.github.io/opcc/';
 
 function initClient() {
-    gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
+    google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
         scope: SCOPES,
-        redirect_uri: REDIRECT_URI
-    }).then(() => {
-        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    }, (error) => {
-        console.error('Error initializing Google API client', error);
-    });
+        callback: (response) => {
+            if (response.error !== undefined) {
+                console.error(response);
+                return;
+            }
+            setIsSignedIn(true);
+            console.log('OAuth Token acquired');
+        },
+    }).then(setTokenClient);
 }
 
 function updateSigninStatus(isSignedIn) {
     setIsSignedIn(isSignedIn);
 }
 
-function handleAuthClick() {
-    gapi.auth2.getAuthInstance().signIn({
-        ux_mode: 'redirect',
-        redirect_uri: REDIRECT_URI
-    });
-}
 
-function handleSignoutClick() {
-    gapi.auth2.getAuthInstance().signOut();
-}
+
+
 
 async function saveToGoogleSheets() {
     if (!tokenClient) {
