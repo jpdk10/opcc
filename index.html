@@ -469,7 +469,7 @@ const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v
 const REDIRECT_URI = 'https://jpdk10.github.io/opcc/';
 
 function initClient() {
-    google.accounts.oauth2.initTokenClient({
+    const tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: (response) => {
@@ -480,7 +480,8 @@ function initClient() {
             setIsSignedIn(true);
             console.log('OAuth Token acquired');
         },
-    }).then(setTokenClient);
+    });
+    setTokenClient(tokenClient);
 }
 
 
