@@ -443,15 +443,14 @@ function initClient() {
         },
     }).then(setTokenClient);
 }
-
+  
     function handleAuthClick() {
-    if (tokenClient) {
-        tokenClient.requestAccessToken({prompt: ''});
-    } else {
-        console.error('Token client not initialized');
+        if (tokenClient) {
+            tokenClient.requestAccessToken({prompt: ''});
+        } else {
+            console.error('Token client not initialized');
+        }
     }
-}
-
 function handleSignoutClick() {
     if (tokenClient && google.accounts.oauth2.hasGrantedAnyScope(tokenClient)) {
         google.accounts.oauth2.revoke(tokenClient.getAccessToken(), () => {
@@ -461,8 +460,8 @@ function handleSignoutClick() {
     }
 }
 
-   React.useEffect(() => {
-    handleauth
+React.useEffect(() => {
+    const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.onload = initClient;
     script.async = true;
@@ -473,6 +472,8 @@ function handleSignoutClick() {
         document.body.removeChild(script);
     };
 }, []);
+
+
 
 const CLIENT_ID = '69632141194-vhq4hbrf2607s0g044m8tg2cv8t19cdv.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyC4BQ_fAHJSxGjk-aPyBcRI27ESbx5_-bE';
