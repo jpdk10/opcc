@@ -458,7 +458,7 @@ function handleSignoutClick() {
 
 function saveToGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A2:L1000';
+    const range = 'Sheet1!B1000:L1000';
 
     const values = cards.map(card => [
         card.name,
@@ -491,7 +491,7 @@ function saveToGoogleSheets() {
 
 function loadFromGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A2:L1000';
+    const range = 'Sheet1!B1000:L1000';
 
     gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
