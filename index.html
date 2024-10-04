@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,8 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
@@ -43,6 +46,7 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
     const [customSet, setCustomSet] = React.useState('');
     const [imageLink, setImageLink] = React.useState('');
     const [previewImage, setPreviewImage] = React.useState(null);
+    
 
     React.useEffect(() => {
         if (card.image) {
@@ -420,6 +424,106 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
       const [showSpecialOnly, setShowSpecialOnly] = React.useState(false);
     const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
     
+    
+    const [isSignedIn, setIsSignedIn] = React.useState(false);
+
+const CLIENT_ID = '69632141194-vhq4hbrf2607s0g044m8tg2cv8t19cdv.apps.googleusercontent.com';
+const API_KEY = 'AIzaSyC4BQ_fAHJSxGjk-aPyBcRI27ESbx5_-bE';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
+
+function initClient() {
+    gapi.client.init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: DISCOVERY_DOCS,
+        scope: SCOPES
+    }).then(() => {
+        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    });
+}
+
+function updateSigninStatus(isSignedIn) {
+    setIsSignedIn(isSignedIn);
+}
+
+function handleAuthClick() {
+    gapi.auth2.getAuthInstance().signIn();
+}
+
+function handleSignoutClick() {
+    gapi.auth2.getAuthInstance().signOut();
+}
+
+function saveToGoogleSheets() {
+    const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
+    const range = 'Sheet1!A1';
+
+    const values = cards.map(card => [
+        card.name,
+        card.set,
+        card.cardNumber,
+        card.version,
+        card.language,
+        card.missing ? 'Yes' : 'No',
+        card.color,
+        card.notes,
+        card.special ? 'Yes' : 'No',
+        card.favorite ? 'Yes' : 'No'
+    ]);
+
+    const body = {
+        values: values
+    };
+
+    gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: spreadsheetId,
+        range: range,
+        valueInputOption: 'RAW',
+        resource: body
+    }).then((response) => {
+        console.log('Data saved to Google Sheets');
+    }, (reason) => {
+        console.error('Error: ' + reason.result.error.message);
+    });
+}
+
+function loadFromGoogleSheets() {
+    const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
+    const range = 'Sheet1!A1:J';
+
+    gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: spreadsheetId,
+        range: range
+    }).then((response) => {
+        const loadedCards = response.result.values.map(row => ({
+            name: row[0],
+            set: row[1],
+            cardNumber: row[2],
+            version: row[3],
+            language: row[4],
+            missing: row[5] === 'Yes',
+            color: row[6],
+            notes: row[7],
+            special: row[8] === 'Yes',
+            favorite: row[9] === 'Yes'
+        }));
+        setCards(loadedCards);
+    }, (reason) => {
+        console.error('Error: ' + reason.result.error.message);
+    });
+}
+
+
+
+
+
+    React.useEffect(() => {
+    gapi.load('client:auth2', initClient);
+}, []);
+
+    
     React.useEffect(() => {
     document.body.style.backgroundColor = theme === 'standard' ? 'black' : '#FFC0CB';
 }, [theme]);
@@ -522,6 +626,8 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                 const customSets = setOptions.filter(set => !initialSetOptions.includes(set));
                 localStorage.setItem('customSets', JSON.stringify(customSets));
             }, [setOptions]);
+            
+            
 
             const handleInputChange = (e) => {
                 const { name, value, type, checked } = e.target;
@@ -535,6 +641,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
             setNewCard(prev => ({ ...prev, image: null }));
         }
     };
+
 
 
      // Modifica la funzione di ordinamento
@@ -754,8 +861,26 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
                             >
                                 Espelli File
                             </button>
+                            
                         )}
+                        
+   
+     <button onClick={handleAuthClick} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+    Sign In con Google
+</button>
+<button onClick={handleSignoutClick} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+    Sign Out da Google
+</button>
+<button onClick={saveToGoogleSheets} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+    Salva su Google Sheets
+</button>
+<button onClick={loadFromGoogleSheets} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+    Carica da Google Sheets
+</button>
+                    
                     </div>
+                    
+                   
                     {loadedFileName && (
                         <p className="mb-4 text-white">File caricato: {loadedFileName}</p>
                     )}
