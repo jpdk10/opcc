@@ -427,7 +427,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     
     const [isSignedIn, setIsSignedIn] = React.useState(false);
 
-          useEffect(() => {
+          React.useEffect(() => {
         // Carica la libreria gapi
         const script = document.createElement('script');
         script.src = 'https://apis.google.com/js/api.js';
