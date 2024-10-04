@@ -458,7 +458,7 @@ function handleSignoutClick() {
 
 function saveToGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A:K';
+    const range = 'Sheet1!A:L';
 
     const values = cards.map(card => [
         card.name,
@@ -466,6 +466,7 @@ function saveToGoogleSheets() {
         card.cardNumber,
         card.version,
         card.language,
+         card.image,
         card.missing ? 'Yes' : 'No',
         card.color,
         card.notes,
@@ -491,7 +492,7 @@ function saveToGoogleSheets() {
 
 function loadFromGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A:K';  // Include tutte le righe dalla A alla K
+    const range = 'Sheet1!A:L';  // Esteso a L per includere tutte le colonne necessarie
 
     gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
@@ -504,18 +505,18 @@ function loadFromGoogleSheets() {
             cardNumber: row[3],
             version: row[4],
             language: row[5],
-            missing: row[6] === 'Yes',
-            color: row[7],
-            notes: row[8],
-            special: row[9] === 'Yes',
-            favorite: row[10] === 'Yes'
+            image: row[6],  // Aggiunto il campo immagine
+            missing: row[7] === 'Yes',
+            color: row[8],
+            notes: row[9],
+            special: row[10] === 'Yes',
+            favorite: row[11] === 'Yes'
         }));
         setCards(loadedCards);
     }, (reason) => {
         console.error('Error: ' + reason.result.error.message);
     });
 }
-
 
 
 
