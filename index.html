@@ -429,20 +429,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
            const [tokenClient, setTokenClient] = React.useState(null);
 
           
-function initClient() {
-    google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (response) => {
-            if (response.error !== undefined) {
-                console.error(response);
-                return;
-            }
-            setIsSignedIn(true);
-            console.log('OAuth Token acquired');
-        },
-    }).then(setTokenClient);
-}
+
   
     function handleAuthClick() {
         if (tokenClient) {
@@ -495,6 +482,8 @@ function initClient() {
         },
     }).then(setTokenClient);
 }
+
+
 
 function updateSigninStatus(isSignedIn) {
     setIsSignedIn(isSignedIn);
