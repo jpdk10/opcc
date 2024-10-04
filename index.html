@@ -458,7 +458,7 @@ function handleSignoutClick() {
 
 function saveToGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!B1000:L1000';
+    const range = 'Sheet1!A:K';
 
     const values = cards.map(card => [
         card.name,
@@ -491,23 +491,24 @@ function saveToGoogleSheets() {
 
 function loadFromGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!B1000:L1000';
+    const range = 'Sheet1!A:K';  // Modificato per includere tutte le righe e una colonna in più per l'ID
 
     gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
         range: range
     }).then((response) => {
         const loadedCards = response.result.values.map(row => ({
-            name: row[0],
-            set: row[1],
-            cardNumber: row[2],
-            version: row[3],
-            language: row[4],
-            missing: row[5] === 'Yes',
-            color: row[6],
-            notes: row[7],
-            special: row[8] === 'Yes',
-            favorite: row[9] === 'Yes'
+            id: row[0],  // Assumendo che l'ID sia nella prima colonna
+            name: row[1],
+            set: row[2],
+            cardNumber: row[3],
+            version: row[4],
+            language: row[5],
+            missing: row[6] === 'Yes',
+            color: row[7],
+            notes: row[8],
+            special: row[9] === 'Yes',
+            favorite: row[10] === 'Yes'
         }));
         setCards(loadedCards);
     }, (reason) => {
