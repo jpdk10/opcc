@@ -491,14 +491,14 @@ function saveToGoogleSheets() {
 
 function loadFromGoogleSheets() {
     const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A:K';  // Modificato per includere tutte le righe e una colonna in più per l'ID
+    const range = 'Sheet1!A:K';  // Include tutte le righe dalla A alla K
 
     gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
         range: range
     }).then((response) => {
-        const loadedCards = response.result.values.map(row => ({
-            id: row[0],  // Assumendo che l'ID sia nella prima colonna
+        const loadedCards = response.result.values.slice(1).map(row => ({  // slice(1) per saltare l'intestazione
+            id: row[0],
             name: row[1],
             set: row[2],
             cardNumber: row[3],
