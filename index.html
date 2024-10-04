@@ -8,7 +8,8 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+
+    
 <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
@@ -22,7 +23,19 @@
     <div id="root"></div>
 
     <script type="text/babel">
+React.useEffect(() => {
+    // Carica la libreria gapi
+    const script = document.createElement('script');
+    script.src = 'https://apis.google.com/js/api.js';
+    script.onload = () => {
+        gapi.load('client:auth2', initClient);
+    };
+    document.body.appendChild(script);
 
+    return () => {
+        document.body.removeChild(script);
+    };
+}, []);
 
 
        const initialSetOptions = [ 'ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
@@ -463,48 +476,63 @@ function handleSignoutClick() {
     gapi.auth2.getAuthInstance().signOut();
 }
 
-function saveToGoogleSheets() {
+async function saveToGoogleSheets() {
     // Verifica se l'utente è autenticato
     if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-        console.error('User not signed in. Please authenticate first.');
-        handleAuthClick(); // Avvia il processo di autenticazione
-        return;
+        console.log('User not signed in. Attempting to authenticate...');
+        try {
+            await gapi.auth2.getAuthInstance().signIn({
+                ux_mode: 'redirect',
+                redirect_uri: REDIRECT_URI
+            });
+        } catch (error) {
+            console.error('Authentication failed:', error);
+            // Qui potresti mostrare un messaggio all'utente
+            return;
+        }
     }
 
-    const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-    const range = 'Sheet1!A2:L'; // Inizia dalla seconda riga per preservare le intestazioni
+    // A questo punto, l'utente dovrebbe essere autenticato
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
+        const range = 'Sheet1!A2:L';
 
-    const values = cards.map(card => [
-        card.id,
-        card.name,
-        card.set,
-        card.cardNumber,
-        card.version,
-        card.language,
-        card.image,
-        card.missing ? 'Yes' : 'No',
-        card.color,
-        card.notes,
-        card.special ? 'Yes' : 'No',
-        card.favorite ? 'Yes' : 'No'
-    ]);
+        const values = cards.map(card => [
+            card.id,
+            card.name,
+            card.set,
+            card.cardNumber,
+            card.version,
+            card.language,
+            card.image,
+            card.missing ? 'Yes' : 'No',
+            card.color,
+            card.notes,
+            card.special ? 'Yes' : 'No',
+            card.favorite ? 'Yes' : 'No'
+        ]);
 
-    const body = {
-        values: values
-    };
+        const body = {
+            values: values
+        };
 
-    gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId: spreadsheetId,
-        range: range,
-        valueInputOption: 'USER_ENTERED',
-        resource: body
-    }).then((response) => {
-        console.log('Data saved to Google Sheets', response);
-        // Qui potresti aggiungere un feedback visuale per l'utente
-    }, (error) => {
-        console.error('Error saving to Google Sheets:', error);
-        // Qui potresti mostrare un messaggio di errore all'utente
-    });
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: spreadsheetId,
+                range: range,
+                valueInputOption: 'USER_ENTERED',
+                resource: body
+            });
+            console.log('Data saved to Google Sheets', response);
+            // Qui potresti aggiungere un feedback visuale per l'utente
+        } catch (error) {
+            console.error('Error saving to Google Sheets:', error);
+            // Qui potresti mostrare un messaggio di errore all'utente
+        }
+    } else {
+        console.error('User still not authenticated after sign-in attempt');
+        // Qui potresti mostrare un messaggio all'utente
+    }
 }
 
 function loadFromGoogleSheets() {
@@ -890,9 +918,12 @@ function loadFromGoogleSheets() {
 <button onClick={handleSignoutClick} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
     Sign Out da Google
 </button>
-<button onClick={saveToGoogleSheets} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-    Salva su Google Sheets
-</button>
+{isSignedIn ? (
+    <button onClick={saveToGoogleSheets}>Salva su Google Sheets</button>
+) : (
+    <button onClick={handleAuthClick}>Accedi con Google</button>
+)}
+
 <button onClick={loadFromGoogleSheets} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
     Carica da Google Sheets
 </button>
