@@ -429,7 +429,7 @@ const [showMissingOnly, setShowMissingOnly] = React.useState(false);
 
 const CLIENT_ID = '69632141194-vhq4hbrf2607s0g044m8tg2cv8t19cdv.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyC4BQ_fAHJSxGjk-aPyBcRI27ESbx5_-bE';
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const SCOPES = 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid https://www.googleapis.com/auth/spreadsheets';
 const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
 
 function initClient() {
