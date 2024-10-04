@@ -449,7 +449,7 @@ function updateSigninStatus(isSignedIn) {
 }
 
 function handleAuthClick() {
-    gapi.auth2.getAuthInstance().signIn();
+    gapi.auth2.getAuthInstance().signIn({ux_mode: 'redirect'});
 }
 
 function handleSignoutClick() {
