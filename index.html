@@ -513,9 +513,9 @@ async function saveToGoogleSheets() {
         });
 
         const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-       const range = selectedCollection === 'Andrea Collection' ? 'Andrea!A2:L' : 'Giulia!A2:L';
+          const range = selectedCollection === 'Andrea Collection' ? 'Andrea!A2:L' : 'Giulia!A2:L';
 
-         const values = cards.map(card => [
+    const values = cards.map(card => [
         card.id,
         card.name,
         card.set,
@@ -568,21 +568,21 @@ async function loadFromGoogleSheets() {
         });
 
         const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-        const range = selectedCollection === 'Andrea Collection' ? 'Andrea!A2:L' : 'Giulia!A2:L';
+        const range = selectedCollection === 'Andrea Collection' ? 'Andrea!A1:L' : 'Giulia!A1:L';
 
-        const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to load from Google Sheets');
+     const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
         }
+    });
 
-        const data = await response.json();
-        const loadedCards = data.values.slice(1).map(row => ({
-        id: row[0] || Date.now() + '-' + Math.random().toString(36).substr(2, 9), // Genera un ID se non esiste
+    if (!response.ok) {
+        throw new Error('Failed to load from Google Sheets');
+    }
+
+    const data = await response.json();
+        const loadedCards = data.values.slice(1).map((row, index) => ({
+        id: row[0] || `${Date.now()}-${index}`, // Genera un ID se non esiste
         name: row[1],
         set: row[2],
         cardNumber: row[3],
@@ -595,6 +595,12 @@ async function loadFromGoogleSheets() {
         special: row[10] === 'Yes',
         favorite: row[11] === 'Yes'
     }));
+
+            console.log('Loaded cards:', loadedCards); // Aggiungiamo questo log per debug
+
+    setCards(loadedCards);
+    console.log('Data loaded from Google Sheets');
+}
 
     setCards(loadedCards);
     console.log('Data loaded from Google Sheets');
