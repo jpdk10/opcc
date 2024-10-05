@@ -581,8 +581,9 @@ async function loadFromGoogleSheets() {
     }
 
     const data = await response.json();
+console.log('Raw data from Google Sheets:', data.values);
         const loadedCards = data.values.slice(1).map((row, index) => ({
-        id: row[0] || `${Date.now()}-${index}`, // Genera un ID se non esiste
+        id: row[0] || `${Date.now()}-${index}`,
         name: row[1],
         set: row[2],
         cardNumber: row[3],
