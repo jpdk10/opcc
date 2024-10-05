@@ -398,6 +398,10 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
+
+const [isMenuVisible, setIsMenuVisible] = React.useState(false);
+
+          
 const [selectedCollection, setSelectedCollection] = React.useState('Andrea Collection');
 
 const [theme, setTheme] = React.useState('standard');
@@ -1058,58 +1062,66 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
     </select>
   </div>
 </div>
-                    <div className="mb-4 flex flex-wrap gap-2">
-                       <button 
-    onClick={() => setIsFormVisible(!isFormVisible)}
-    className={`px-4 py-2 ${theme === 'standard' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-pink-500 hover:bg-pink-600'} text-white rounded transition-colors`}
->
-    {isFormVisible ? 'Nascondi Form' : 'Aggiungi (N)'}
-</button>
-                      <label className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
-    {loadedFileName ? 'Cambia File (L)' : 'Carica Excel (L)'}
-    <input id="excelUpload" type="file" onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
-</label>
-                        <button 
-                            onClick={() => setIsExportDialogOpen(true)}
-                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-                        >
-                            Esporta in Excel
-                        </button>
-                        {loadedFileName && (
-                            <button 
-                                onClick={handleFileEject}
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                            >
-                                Espelli File
-                            </button>
-                            
-                        )}
-                        
-   
-   {isSignedIn ? (
-    <div>
-        <button onClick={handleSignoutClick} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors mr-2">
-            Sign Out da Google
-        </button>
-        <button onClick={saveToGoogleSheets} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors mr-2">
-            Salva su Google Sheets
-        </button>
-        <button onClick={loadFromGoogleSheets} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
-            Carica da Google Sheets
-        </button>
-    </div>
-) : (
-    <button onClick={handleAuthClick} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-        Sign In con Google
-    </button>
-)}
-                      <button 
-        onClick={clearCache}
-        className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                  <div className="mb-4">
+    <button 
+        onClick={() => setIsMenuVisible(!isMenuVisible)}
+        className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors mb-2"
     >
-        Cancella Cache
+        {isMenuVisible ? 'Chiudi MENU' : 'Apri MENU'}
     </button>
-                    </div>
+    
+    {isMenuVisible && (
+        <div className="flex flex-wrap gap-2">
+            <button 
+                onClick={() => setIsFormVisible(!isFormVisible)}
+                className={`px-4 py-2 ${theme === 'standard' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-pink-500 hover:bg-pink-600'} text-white rounded transition-colors`}
+            >
+                {isFormVisible ? 'Nascondi Form' : 'Aggiungi (N)'}
+            </button>
+            <label className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
+                {loadedFileName ? 'Cambia File (L)' : 'Carica Excel (L)'}
+                <input id="excelUpload" type="file" onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
+            </label>
+            <button 
+                onClick={() => setIsExportDialogOpen(true)}
+                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+            >
+                Esporta in Excel
+            </button>
+            {loadedFileName && (
+                <button 
+                    onClick={handleFileEject}
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                    Espelli File
+                </button>
+            )}
+            {isSignedIn ? (
+                <div>
+                    <button onClick={handleSignoutClick} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors mr-2">
+                        Sign Out da Google
+                    </button>
+                    <button onClick={saveToGoogleSheets} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors mr-2">
+                        Salva su Google Sheets
+                    </button>
+                    <button onClick={loadFromGoogleSheets} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                        Carica da Google Sheets
+                    </button>
+                </div>
+            ) : (
+                <button onClick={handleAuthClick} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                    Sign In con Google
+                </button>
+            )}
+            <button 
+                onClick={clearCache}
+                className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+            >
+                Cancella Cache
+            </button>
+        </div>
+    )}
+</div>
                     
                    
                     {loadedFileName && (
