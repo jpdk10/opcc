@@ -448,6 +448,12 @@ function handleSignoutClick() {
     }
 }
 
+              React.useEffect(() => {
+        if (!Array.isArray(cards)) {
+            setCards([]);
+        }
+    }, [cards]);
+          
 React.useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
@@ -582,20 +588,20 @@ async function loadFromGoogleSheets() {
         const data = await response.json();
         console.log('Raw data from Google Sheets:', data.values);
 
-        const loadedCards = data.values.slice(1).map((row, index) => ({
-            id: row[0] || `${Date.now()}-${index}`,
-            name: row[1],
-            set: row[2],
-            cardNumber: row[3],
-            version: row[4],
-            language: row[5],
-            image: row[6],
-            missing: row[7] === 'Yes',
-            color: row[8],
-            notes: row[9],
-            special: row[10] === 'Yes',
-            favorite: row[11] === 'Yes'
-        }));
+const loadedCards = data.values.slice(1).map((row, index) => ({
+    id: row[0] || `${Date.now()}-${index}`,
+    name: row[1] || '',
+    set: row[2] || '',
+    cardNumber: row[3] || '',
+    version: row[4] || '',
+    language: row[5] || 'ENG',
+    image: row[6] || null,
+    missing: row[7] === 'Yes',
+    color: row[8] || '',
+    notes: row[9] || '',
+    special: row[10] === 'Yes',
+    favorite: row[11] === 'Yes'
+}));
 
         console.log('Loaded cards:', loadedCards);
 
@@ -810,15 +816,15 @@ saveToGoogleSheets(); // Aggiungi questa riga
                 }
             };
             
-     const filteredCards = cards.filter(card => 
-        (activeSet === 'ALL' || card.set === activeSet) &&
-        (card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (!showMissingOnly || card.missing) &&
-        (!showNonV1Only || card.version !== 'V1') &&
-        (!showSpecialOnly || card.special) &&
-        (!showFavoritesOnly || card.favorite)
-    );
+const filteredCards = Array.isArray(cards) ? cards.filter(card => 
+    (activeSet === 'ALL' || card.set === activeSet) &&
+    ((card.name && card.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+     (card.cardNumber && card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    (!showMissingOnly || card.missing) &&
+    (!showNonV1Only || (card.version && card.version !== 'V1')) &&
+    (!showSpecialOnly || card.special) &&
+    (!showFavoritesOnly || card.favorite)
+);
 
     const indexOfLastCard = currentPage * cardsPerPage;
     const indexOfFirstCard = indexOfLastCard - cardsPerPage;
@@ -827,8 +833,9 @@ saveToGoogleSheets(); // Aggiungi questa riga
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const CardGrid = ({ cards, onCardClick, onEditCard, onDeleteCard }) => (
+ const CardGrid = ({ cards, onCardClick, onEditCard, onDeleteCard }) => (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {Array.isArray(cards) && cards.map((card) => (
         {cards.map((card) => (
             <div 
                 key={card.id} // Usa l'ID unico qui
