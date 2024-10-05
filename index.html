@@ -745,18 +745,25 @@ async function loadFromGoogleSheets() {
                 'Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
             ];
 
-            updatedCards.sort((a, b) => {
-                // 1. Ordinare per set
-                const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
-                if (setOrderDiff !== 0) return setOrderDiff;
+           const versionOrder = ['V1', 'V2', 'V3'];
 
-                // 2. Se stesso set, ordinare per colore
-                const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
-                if (colorOrder !== 0) return colorOrder;
+        updatedCards.sort((a, b) => {
+            // 1. Ordinare per set
+            const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
+            if (setOrderDiff !== 0) return setOrderDiff;
 
-                // 3. Se stesso colore, ordinare per numero carta
-                return parseInt(a.cardNumber) - parseInt(b.cardNumber);
-            });
+            // 2. Se stesso set, ordinare per versione
+            const versionOrderDiff = versionOrder.indexOf(a.version) - versionOrder.indexOf(b.version);
+            if (versionOrderDiff !== 0) return versionOrderDiff;
+
+            // 3. Se stessa versione, ordinare per colore
+            const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
+            if (colorOrder !== 0) return colorOrder;
+
+            // 4. Se stesso colore, ordinare per numero carta
+            return parseInt(a.cardNumber) - parseInt(b.cardNumber);
+        });
+    
         
             setCards(updatedCards);
             setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
