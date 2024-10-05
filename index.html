@@ -901,16 +901,16 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 
 
   const Pagination = ({ currentPage, totalPages, paginate }) => {
+    const [jumpToPage, setJumpToPage] = React.useState('');
     const pageNumbers = [];
-    const maxPagesToShow = 5; // Numero massimo di pagine da mostrare
+    const maxPagesToShow = 5;
 
+    // Logica per generare i numeri di pagina (come prima)
     if (totalPages <= maxPagesToShow) {
-        // Se il totale delle pagine è minore o uguale al massimo da mostrare, mostra tutte le pagine
         for (let i = 1; i <= totalPages; i++) {
             pageNumbers.push(i);
         }
     } else {
-        // Altrimenti, mostra un sottoinsieme di pagine
         if (currentPage <= 3) {
             for (let i = 1; i <= 5; i++) {
                 pageNumbers.push(i);
@@ -934,24 +934,52 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         }
     }
 
+    const handleJumpToPage = (e) => {
+        e.preventDefault();
+        const pageNumber = parseInt(jumpToPage);
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+            paginate(pageNumber);
+            setJumpToPage('');
+        }
+    };
+
     return (
-        <div className="flex justify-center mt-4 space-x-2">
-            {pageNumbers.map((number, index) => (
-                <button
-                    key={index}
-                    onClick={() => number !== '...' && paginate(number)}
-                    className={`px-3 py-1 rounded ${
-                        currentPage === number 
-                            ? 'bg-blue-500 text-white' 
-                            : number === '...' 
-                                ? 'bg-gray-200 text-black cursor-default' 
-                                : 'bg-gray-200 text-black hover:bg-gray-300'
-                    }`}
-                    disabled={number === '...'}
+        <div className="flex flex-col items-center mt-4 space-y-2">
+            <div className="flex justify-center space-x-2">
+                {pageNumbers.map((number, index) => (
+                    <button
+                        key={index}
+                        onClick={() => number !== '...' && paginate(number)}
+                        className={`px-3 py-1 rounded ${
+                            currentPage === number 
+                                ? 'bg-blue-500 text-white' 
+                                : number === '...' 
+                                    ? 'bg-gray-200 text-black cursor-default' 
+                                    : 'bg-gray-200 text-black hover:bg-gray-300'
+                        }`}
+                        disabled={number === '...'}
+                    >
+                        {number}
+                    </button>
+                ))}
+            </div>
+            <form onSubmit={handleJumpToPage} className="flex items-center space-x-2">
+                <input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={jumpToPage}
+                    onChange={(e) => setJumpToPage(e.target.value)}
+                    className="w-16 px-2 py-1 text-sm border rounded text-black"
+                    placeholder="Pagina"
+                />
+                <button 
+                    type="submit"
+                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
-                    {number}
+                    Vai
                 </button>
-            ))}
+            </form>
         </div>
     );
 };
