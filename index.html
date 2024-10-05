@@ -836,7 +836,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
  const CardGrid = ({ cards, onCardClick, onEditCard, onDeleteCard }) => (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {Array.isArray(cards) && cards.map((card) => (
-        {cards.map((card) => (
+       
             <div 
                 key={card.id} // Usa l'ID unico qui
                 className={`relative ${card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
