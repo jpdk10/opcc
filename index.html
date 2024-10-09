@@ -1,4 +1,8 @@
 
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,6 +153,18 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
           </select>
         )}
       </div>
+      
+      <div className="flex items-center mt-2">
+    <input
+        type="checkbox"
+        id="isDon"
+        name="isDon"
+        checked={card.isDon}
+        onChange={onInputChange}
+        className="mr-2"
+    />
+    <label htmlFor="isDon" className="text-white">DON!!</label>
+</div>
                 <div>
                     <label className="block mb-1 text-white">Numero Carta</label>
                     <input
@@ -160,6 +176,28 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                         placeholder="Numero della carta"
                     />
                 </div>
+                <div>
+    <label className="block mb-1 text-white">Set Originale (opzionale)</label>
+    <input
+        type="text"
+        name="ogSet"
+        value={card.ogSet}
+        onChange={onInputChange}
+        className="w-full px-3 py-2 border rounded text-black"
+        placeholder="Set originale"
+    />
+</div>
+<div>
+    <label className="block mb-1 text-white">Numero Carta Originale (opzionale)</label>
+    <input
+        type="text"
+        name="ogCardNumber"
+        value={card.ogCardNumber}
+        onChange={onInputChange}
+        className="w-full px-3 py-2 border rounded text-black"
+        placeholder="Numero carta originale"
+    />
+</div>
                 <div>
                     <label className="block mb-1 text-white">Versione</label>
                     <select
@@ -398,11 +436,22 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
+        
+        const [utilityPopupVisible, setUtilityPopupVisible] = React.useState(false);
+const [shopPopupVisible, setShopPopupVisible] = React.useState(false);
+const [comingSoonPopupVisible, setComingSoonPopupVisible] = React.useState(false);
 
-const [isMenuVisible, setIsMenuVisible] = React.useState(false);
+        const [linkCopied, setLinkCopied] = React.useState(false);
+        const [utilityVisible, setUtilityVisible] = React.useState(false);
+        const [shopVisible, setShopVisible] = React.useState(false);
+
+        const [isMenuVisible, setIsMenuVisible] = React.useState(false);
 
           
-const [selectedCollection, setSelectedCollection] = React.useState('Andrea Collection');
+  const [selectedCollection, setSelectedCollection] = React.useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('collection') === 'Giulia' ? 'Giulia Collection' : 'Andrea Collection';
+  });
 
 const [theme, setTheme] = React.useState('standard');
 const toggleTheme = () => {
@@ -413,7 +462,22 @@ const toggleTheme = () => {
     const cardsPerPage = 20; // Numero di carte per pagina
     const [cards, setCards] = React.useState([]);
 const [newCard, setNewCard] = React.useState({
-    id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '', notes: '', special: false, favorite: false
+    id: null,
+    name: '',
+    set: '',
+    cardNumber: '',
+    version: '',
+    language: 'ENG',
+    image: null,
+    missing: false,
+    color: '',
+    notes: '',
+    special: false,
+    favorite: false,
+    ogSet: '',  // Aggiungi questo
+    ogCardNumber: '',  // Aggiungi questo
+    isDon: false  // Aggiungi questo campo
+    
 });
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [activeSet, setActiveSet] = React.useState('ALL');
@@ -443,6 +507,10 @@ const clearCache = () => {
     alert('Cache cancellata. La pagina verrà ricaricata.');
     window.location.reload();
 };
+
+
+ 
+  
   
     function handleAuthClick() {
         if (tokenClient) {
@@ -459,6 +527,28 @@ function handleSignoutClick() {
         });
     }
 }
+
+
+
+   React.useEffect(() => {
+    const newUrl = `${window.location.pathname}?collection=${selectedCollection.split(' ')[0]}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  }, [selectedCollection]);
+  
+const generateCollectionLink = () => {
+  const baseUrl = window.location.origin + window.location.pathname;
+  return `${baseUrl}?collection=${selectedCollection.split(' ')[0]}`;
+};
+
+const copyLinkToClipboard = () => {
+  const link = generateCollectionLink();
+  navigator.clipboard.writeText(link).then(() => {
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }).catch(err => {
+    console.error('Errore nel copiare il link: ', err);
+  });
+};
 
               React.useEffect(() => {
         if (!Array.isArray(cards)) {
@@ -533,20 +623,24 @@ async function saveToGoogleSheets() {
         const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
         const range = selectedCollection === 'Andrea Collection' ? 'Andrea!A2:L' : 'Giulia!A2:L';
 
-        const values = cards.map(card => [
-            card.id,
-            card.name,
-            card.set,
-            card.cardNumber,
-            card.version,
-            card.language,
-            card.image,
-            card.missing ? 'Yes' : 'No',
-            card.color,
-            card.notes,
-            card.special ? 'Yes' : 'No',
-            card.favorite ? 'Yes' : 'No'
-        ]);
+  const values = cards.map(card => [
+    card.id,
+    card.name,
+    card.set,
+    card.cardNumber,
+    card.version,
+    card.language,
+    card.image,
+    card.missing ? 'Yes' : 'No',
+    card.color,
+    card.notes,
+    card.special ? 'Yes' : 'No',
+    card.favorite ? 'Yes' : 'No',
+    card.ogSet,  // Aggiungi questo
+    card.ogCardNumber,  // Aggiungi questo
+    card.isDon ? 'Yes' : 'No'  // Aggiungi questo
+    
+]);
 
         const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=USER_ENTERED`, {
             method: 'PUT',
@@ -612,7 +706,11 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
     color: row[8] || '',
     notes: row[9] || '',
     special: row[10] === 'Yes',
-    favorite: row[11] === 'Yes'
+    favorite: row[11] === 'Yes',
+    ogSet: row[12] || '',  // Aggiungi questo
+    ogCardNumber: row[13] || '',  // Aggiungi questo
+    isDon: row[14] === 'Yes'  // Aggiungi questo (assumendo che sia la 15a colonna)
+    
 }));
 
         console.log('Loaded cards:', loadedCards);
@@ -774,28 +872,63 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
             ];
 
            const versionOrder = ['V1', 'V2', 'V3'];
+updatedCards.sort((a, b) => {
+    // 1. Ordinare per set
+    const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
+    if (setOrderDiff !== 0) return setOrderDiff;
 
-        updatedCards.sort((a, b) => {
-            // 1. Ordinare per set
-            const setOrderDiff = setOrder.indexOf(a.set) - setOrder.indexOf(b.set);
-            if (setOrderDiff !== 0) return setOrderDiff;
+    // 2. Se una delle due è una carta DON!!, metterla dopo
+    if (a.isDon && !b.isDon) return 1;
+    if (!a.isDon && b.isDon) return -1;
 
-            // 2. Se stesso set, ordinare per versione
-            const versionOrderDiff = versionOrder.indexOf(a.version) - versionOrder.indexOf(b.version);
-            if (versionOrderDiff !== 0) return versionOrderDiff;
+    // Se entrambe sono DON!!, ordina per numero carta
+    if (a.isDon && b.isDon) {
+        return parseInt(a.cardNumber) - parseInt(b.cardNumber);
+    }
 
-            // 3. Se stessa versione, ordinare per colore
-            const colorOrder = colorOptions.findIndex(c => c.value === a.color) - colorOptions.findIndex(c => c.value === b.color);
-            if (colorOrder !== 0) return colorOrder;
+    // 3. Se stesso set e non sono DON!!, ordinare per versione
+    const versionOrderDiff = versionOrder.indexOf(a.version) - versionOrder.indexOf(b.version);
+    if (versionOrderDiff !== 0) return versionOrderDiff;
 
-            // 4. Se stesso colore, ordinare per numero carta
-            return parseInt(a.cardNumber) - parseInt(b.cardNumber);
-        });
+    // 4. Se stesso colore, ordinare per numero carta
+    if (!a.ogSet && !b.ogSet) {
+        return parseInt(a.cardNumber) - parseInt(b.cardNumber);
+    }
+
+    // 5. Se una delle due è una carta speciale (ha ogSet), metterla dopo
+    if (a.ogSet && !b.ogSet) return 1;
+    if (!a.ogSet && b.ogSet) return -1;
+
+    // 6. Se entrambe sono speciali, ordinare per ogSet e ogCardNumber
+    if (a.ogSet && b.ogSet) {
+        const ogSetOrderDiff = setOrder.indexOf(a.ogSet) - setOrder.indexOf(b.ogSet);
+        if (ogSetOrderDiff !== 0) return ogSetOrderDiff;
+        return parseInt(a.ogCardNumber) - parseInt(b.ogCardNumber);
+    }
+
+    return 0;
+});
     
         
       setCards(updatedCards);
         saveToGoogleSheets();
-        setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
+ setNewCard({
+    id: null,
+    name: '',
+    set: '',
+    cardNumber: '',
+    version: '',
+    language: 'ENG',
+    image: null,
+    missing: false,
+    color: '',
+    notes: '',
+    special: false,
+    favorite: false,
+    isDon: false,
+    ogSet: '',
+    ogCardNumber: ''
+});
         setIsEditDialogOpen(false);
         setIsFormVisible(false);
     }
@@ -850,14 +983,14 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         {Array.isArray(cards) && cards.map((card) => (
        
             <div 
-                key={card.id} // Usa l'ID unico qui
-                className={`relative ${card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
-                            ${card.missing ? 'grayscale hover:grayscale-0' : ''} cursor-pointer`}
-                style={{
-                    boxShadow: card.missing ? '0 0 0 2px red' : 'none'
-                }}
-                onClick={() => onCardClick(card)}
-            >
+    key={card.id}
+    className={`relative ${card.isDon ? 'bg-white' : card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
+                ${card.missing ? 'grayscale hover:grayscale-0' : ''} cursor-pointer`}
+    style={{
+        boxShadow: card.missing ? '0 0 0 2px red' : 'none'
+    }}
+    onClick={() => onCardClick(card)}
+>
                 <div className="relative pt-[100%] w-full mt-4">
                     {card.image && (
                         <img 
@@ -871,7 +1004,15 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                     <h3 className="font-bold text-lg mb-2 text-white text-shadow">
                         {card.name.toUpperCase()} ({card.version}) {getFlagEmoji(card.language)}
                     </h3>
-                    <p className="text-sm text-white text-shadow">({card.set} - {card.cardNumber})</p>
+                    <p className="text-sm text-white text-shadow">
+    ({card.set} - {card.cardNumber})
+    {card.ogSet && ` (OG: ${card.ogSet} - ${card.ogCardNumber})`}
+      {card.isDon && (
+        <span className="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">
+            DON!!
+        </span>
+    )}
+</p>
                 </div>
                 {card.missing && (
                     <p className="text-sm font-bold text-red-500 bg-white px-2 py-1 rounded absolute top-2 right-2 z-10">
@@ -1051,21 +1192,112 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
   </div>
 
   {/* Selettore della collezione */}
-  <div className="mt-2">
-    <select 
-      value={selectedCollection} 
-      onChange={(e) => setSelectedCollection(e.target.value)}
-      className="px-2 py-1 rounded text-black w-full sm:w-auto"
-    >
-      <option value="Andrea Collection">Andrea Collection</option>
-      <option value="Giulia Collection">Giulia Collection</option>
-    </select>
-  </div>
+<div className="mt-2">
+  <select 
+    value={selectedCollection} 
+    onChange={(e) => setSelectedCollection(e.target.value)}
+    className="px-2 py-1 rounded text-black w-full sm:w-auto"
+  >
+    <option value="Andrea Collection">Andrea Collection</option>
+    <option value="Giulia Collection">Giulia Collection</option>
+  </select>
+  
 </div>
+</div>
+
+<div className="grid grid-cols-3 gap-2 mb-4">
+  <button 
+    onClick={() => setUtilityPopupVisible(true)}
+    className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+  >
+    UTILITY
+  </button>
+  <button 
+    onClick={() => setShopPopupVisible(true)}
+    className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+  >
+    SHOP
+  </button>
+  <button 
+    onClick={() => setComingSoonPopupVisible(true)}
+    className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+  >
+    Coming Soon
+  </button>
+</div>
+
+{utilityPopupVisible && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg">
+      <h2 className="text-xl font-bold mb-4 text-black">Utility</h2>
+      <button 
+        onClick={copyLinkToClipboard}
+        className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors mb-2"
+      >
+        {linkCopied ? 'Link Copiato!' : 'Copia Link Collezione'}
+      </button>
+        <a 
+        href="https://docs.google.com/spreadsheets/d/13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ/edit?gid=0#gid=0" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="block w-full px-4 py-2 bg-green-800 text-white rounded hover:bg-green-900 transition-colors text-center mb-2"
+      >
+        Gestionale
+      </a>
+      <a 
+        href="https://www.cardmarket.com/it/OnePiece/Products/Singles?mode=gallery&idExpansion=0&idRarity=0&sortBy=price_desc&site=16" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="block w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors text-center mb-2"
+      >
+        Card Market
+      </a>
+      <button 
+        onClick={() => setUtilityPopupVisible(false)}
+        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Chiudi
+      </button>
+    </div>
+  </div>
+)}
+
+{shopPopupVisible && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg">
+      <h2 className="text-xl font-bold mb-4 text-black">Shop</h2>
+      <p className="text-black mb-4">Contenuto dello Shop (da implementare)</p>
+      <button 
+        onClick={() => setShopPopupVisible(false)}
+        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Chiudi
+      </button>
+    </div>
+  </div>
+)}
+
+{comingSoonPopupVisible && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg">
+      <h2 className="text-xl font-bold mb-4 text-black">Coming Soon</h2>
+      <p className="text-black mb-4">Nuove funzionalità in arrivo!</p>
+      <button 
+        onClick={() => setComingSoonPopupVisible(false)}
+        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Chiudi
+      </button>
+    </div>
+  </div>
+)}
+
                   <div className="mb-4">
+                  
+                  
     <button 
         onClick={() => setIsMenuVisible(!isMenuVisible)}
-        className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors mb-2"
+        className="w-full px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-950 transition-colors mb-2"
     >
         {isMenuVisible ? 'Chiudi MENU' : 'Apri MENU'}
     </button>
@@ -1138,7 +1370,23 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                 onAddCustomSet={addCustomSet}
                 setOptions={setOptions}
                 onCancel={() => {
-                    setNewCard({ id: null, name: '', set: '', cardNumber: '', version: '', language: 'ENG', image: null, missing: false, color: '' });
+setNewCard({
+    id: null,
+    name: '',
+    set: '',
+    cardNumber: '',
+    version: '',
+    language: 'ENG',
+    image: null,
+    missing: false,
+    color: '',
+    notes: '',
+    special: false,
+    favorite: false,
+    isDon: false,
+    ogSet: '',
+    ogCardNumber: ''
+});
                     setIsFormVisible(false);
                 }}
                             />
@@ -1266,9 +1514,9 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
-            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md"> {/* Ridotto max-w-2xl a max-w-md */}
-                <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2> {/* Ridotto text-2xl a text-xl */}
-                <div className="grid grid-cols-2 gap-2 mb-4 text-sm"> {/* Aggiunto text-sm per ridurre la dimensione del testo */}
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2>
+                <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
                     <p><span className="font-bold">Set:</span> {card.set}</p>
                     <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
                     <p><span className="font-bold">Versione:</span> {card.version}</p>
@@ -1277,6 +1525,9 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                     <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
                     <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
                     <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
+                    <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
+                    {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
+                    {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
                 </div>
                 {card.notes && (
                     <div className="mb-4">
