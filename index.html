@@ -642,6 +642,12 @@ async function saveToGoogleSheets() {
     
 ]);
 
+      console.log('Attempting to save to Google Sheets...');
+        console.log('Token:', token);
+        console.log('Spreadsheet ID:', spreadsheetId);
+        console.log('Range:', range);
+        console.log('Values:', values);
+
         const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=USER_ENTERED`, {
             method: 'PUT',
             headers: {
@@ -652,12 +658,22 @@ async function saveToGoogleSheets() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to save to Google Sheets');
+            const errorText = await response.text();
+            console.error('Response not OK. Status:', response.status);
+            console.error('Response text:', errorText);
+            throw new Error(`Failed to save to Google Sheets: ${response.status} ${errorText}`);
         }
 
-        console.log('Data saved to Google Sheets');
+        const responseData = await response.json();
+        console.log('Save successful. Response:', responseData);
+
     } catch (error) {
-        console.error('Error saving to Google Sheets:', error);
+        console.error('Detailed error in saving to Google Sheets:', error);
+        if (error.response) {
+            const errorText = await error.response.text();
+            console.error('Error response text:', errorText);
+        }
+        throw error; // Rethrow the error so it can be caught by the caller
     }
 }
 
