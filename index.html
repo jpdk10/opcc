@@ -1017,10 +1017,10 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                     )}
                 </div>
                 <div className="p-4 flex-grow">
-                    <h3 className="font-bold text-lg mb-2 text-white text-shadow">
+                    <h3 className={`font-bold text-lg mb-2 ${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
                         {card.name.toUpperCase()} ({card.version}) {getFlagEmoji(card.language)}
                     </h3>
-                    <p className="text-sm text-white text-shadow">
+                    <p className={`text-sm ${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
     ({card.set} - {card.cardNumber})
     {card.ogSet && ` (OG: ${card.ogSet} - ${card.ogCardNumber})`}
       {card.isDon && (
@@ -1530,7 +1530,7 @@ setNewCard({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
-            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-xs border-2 border-gray-300">
                 <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2>
                 <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
                     <p><span className="font-bold">Set:</span> {card.set}</p>
