@@ -889,14 +889,16 @@ const handlePrint = () => {
                 </style>
             </head>
             <body>
-                <h1>Carte Mancanti</h1>
+                <h1>Mancanti</h1>
                 <table>
                     <thead>
                         <tr>
                             <th>Nome Carta</th>
                             <th>Set</th>
                             <th>Numero</th>
+                            <th>Versione</th>
                             <th>Prezzo</th>
+                            <th>Note</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -905,6 +907,8 @@ const handlePrint = () => {
                                 <td>${card.name}</td>
                                 <td>${card.set}</td>
                                 <td>${card.number}</td>
+                                <td>${card.version}</td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         `).join('')}
