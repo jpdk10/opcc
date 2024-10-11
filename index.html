@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -376,6 +377,38 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                 </div>
             );
         };
+        
+        
+        const PrintDialog = ({ isOpen, onClose, sets, selectedSets, onSetToggle, onPrint }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+            <div className="bg-slate-900 border-2 border-gray-400 p-6 rounded-lg w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4">Seleziona i Set da Stampare</h2>
+                <div className="mb-4 max-h-60 overflow-y-auto">
+                    {sets.map(set => (
+                        <label key={set} className="flex items-center mb-2">
+                            <input
+                                type="checkbox"
+                                checked={selectedSets.includes(set)}
+                                onChange={() => onSetToggle(set)}
+                                className="mr-2"
+                            />
+                            {set}
+                        </label>
+                    ))}
+                </div>
+                <div className="flex justify-end space-x-2">
+                    <button onClick={onClose} className="px-4 py-2 bg-red-500 rounded">Annulla</button>
+                    <button onClick={onPrint} className="px-4 py-2 bg-green-500 text-white rounded">Stampa</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 const getSetIcon = (set) => {
   if (['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'EPB01', 'PRB01'].includes(set)) {
     return '🔴'; // Icona rossa
@@ -486,6 +519,8 @@ const [newCard, setNewCard] = React.useState({
     const [setOptions, setSetOptions] = React.useState(initialSetOptions);
     const [loadedFileName, setLoadedFileName] = React.useState(null);
     const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false);
+    const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
+const [selectedSetsToPrint, setSelectedSetsToPrint] = React.useState([]);
     
 const [showMissingOnly, setShowMissingOnly] = React.useState(false);
     const [showNonV1Only, setShowNonV1Only] = React.useState(false);
@@ -821,6 +856,66 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
                 XLSX.writeFile(workbook, `${fileName || 'card_collection'}.xlsx`);
                 setIsExportDialogOpen(false);
             };
+            
+            const togglePrintDialog = () => setIsPrintDialogOpen(!isPrintDialogOpen);
+
+const handleSetSelection = (set) => {
+    setSelectedSetsToPrint(prev => 
+        prev.includes(set) ? prev.filter(s => s !== set) : [...prev, set]
+    );
+};
+
+const generatePrintableMissingCards = () => {
+    return cards.filter(card => 
+        card.missing && selectedSetsToPrint.includes(card.set)
+    ).map(card => ({
+        name: card.name,
+        set: card.set,
+        number: card.cardNumber
+    }));
+};
+
+const handlePrint = () => {
+    const missingCards = generatePrintableMissingCards();
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Carte Mancanti</title>
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid black; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                <h1>Carte Mancanti</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome Carta</th>
+                            <th>Set</th>
+                            <th>Numero</th>
+                            <th>Prezzo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${missingCards.map(card => `
+                            <tr>
+                                <td>${card.name}</td>
+                                <td>${card.set}</td>
+                                <td>${card.number}</td>
+                                <td></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+};
 
             const handleFileEject = () => {
                  setCards([]);
@@ -1336,6 +1431,13 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
             >
                 Esporta in Excel
             </button>
+            <button 
+    onClick={togglePrintDialog}
+    className="px-4 py-2 bg-rose-950 text-white rounded hover:bg-purple-600 transition-colors"
+>
+    PRINT MISS
+</button>
+
             {loadedFileName && (
                 <button 
                     onClick={handleFileEject}
@@ -1517,6 +1619,19 @@ setNewCard({
                         onClose={() => setIsExportDialogOpen(false)}
                         onExport={handleExcelExport}
                     />
+                    
+                    <PrintDialog
+    isOpen={isPrintDialogOpen}
+    onClose={togglePrintDialog}
+    sets={setOptions}
+    selectedSets={selectedSetsToPrint}
+    onSetToggle={handleSetSelection}
+    onPrint={() => {
+        handlePrint();
+        togglePrintDialog();
+    }}
+/>
+
                 </div>
             );
         };
