@@ -1,9 +1,3 @@
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1344,33 +1338,48 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 
 {utilityPopupVisible && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-lg">
+    <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
       <h2 className="text-xl font-bold mb-4 text-black">Utility</h2>
-      <button 
-        onClick={copyLinkToClipboard}
-        className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors mb-2"
-      >
-        {linkCopied ? 'Link Copiato!' : 'Copia Link Collezione'}
-      </button>
-        <a 
-        href="https://docs.google.com/spreadsheets/d/13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ/edit?gid=0#gid=0" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="block w-full px-4 py-2 bg-green-800 text-white rounded hover:bg-green-900 transition-colors text-center mb-2"
-      >
-        Gestionale
-      </a>
-      <a 
-        href="https://www.cardmarket.com/it/OnePiece/Products/Singles?mode=gallery&idExpansion=0&idRarity=0&sortBy=price_desc&site=16" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="block w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors text-center mb-2"
-      >
-        Card Market
-      </a>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          {/* Prima colonna */}
+          <button 
+            onClick={copyLinkToClipboard}
+            className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+          >
+            {linkCopied ? 'Link Copiato!' : 'Copia Link Collezione'}
+          </button>
+          <a 
+            href="https://docs.google.com/spreadsheets/d/13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ/edit?gid=0#gid=0" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block w-full px-4 py-2 bg-green-800 text-white rounded hover:bg-green-900 transition-colors text-center"
+          >
+            Gestionale
+          </a>
+          <a 
+            href="https://www.cardmarket.com/it/OnePiece/Products/Singles?mode=gallery&idExpansion=0&idRarity=0&sortBy=price_desc&site=16" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors text-center"
+          >
+            Card Market
+          </a>
+        </div>
+        <div className="space-y-2">
+          {/* Seconda colonna */}
+          <button 
+            onClick={togglePrintDialog}
+            className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+          >
+            PRINT MISS
+          </button>
+          {/* Aggiungi qui altri pulsanti per la seconda colonna */}
+        </div>
+      </div>
       <button 
         onClick={() => setUtilityPopupVisible(false)}
-        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+        className="w-full mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
       >
         Chiudi
       </button>
