@@ -473,7 +473,6 @@ const toggleFullscreen = () => {
     } else {
       window.scrollTo(0, 0);
     }
-    setIsFullscreen(!isFullscreen);
   } else {
     // Other devices
     if (!document.fullscreenElement) {
@@ -485,15 +484,9 @@ const toggleFullscreen = () => {
         document.exitFullscreen();
       }
     }
-    setIsFullscreen(!isFullscreen);
   }
+  setIsFullscreen(!isFullscreen);
 };
-
-
-
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-}, []);
 
         const [utilityPopupVisible, setUtilityPopupVisible] = React.useState(false);
 const [shopPopupVisible, setShopPopupVisible] = React.useState(false);
