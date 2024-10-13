@@ -463,6 +463,29 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
+
+
+          const goFullScreen = () => {
+    if (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+    }
+  };
+
+          React.useEffect(() => {
+  goFullScreen();
+}, []);
         
         const [utilityPopupVisible, setUtilityPopupVisible] = React.useState(false);
 const [shopPopupVisible, setShopPopupVisible] = React.useState(false);
@@ -1422,13 +1445,13 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                   
     <button 
         onClick={() => setIsMenuVisible(!isMenuVisible)}
-        className="w-full px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-950 transition-colors mb-2"
+    className="w-full px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-950 transition-colors mb-2 sm:hidden"
     >
         {isMenuVisible ? 'Chiudi MENU' : 'Apri MENU'}
     </button>
     
     {isMenuVisible && (
-        <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 sm:hidden">
             <button 
                 onClick={() => setIsFormVisible(!isFormVisible)}
                 className={`px-4 py-2 ${theme === 'standard' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-pink-500 hover:bg-pink-600'} text-white rounded transition-colors`}
