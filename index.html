@@ -463,7 +463,7 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
-        const [isFullscreen, setIsFullscreen] = React.useState(false);
+       const [isFullscreen, setIsFullscreen] = React.useState(false);
 
 const toggleFullscreen = () => {
   if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
@@ -487,6 +487,18 @@ const toggleFullscreen = () => {
     }
   }
 };
+
+// Aggiungi questo effetto per gestire il cambio di fullscreen su dispositivi non iOS
+React.useEffect(() => {
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+
+  if (!navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }
+}, []);
 
 
 
@@ -1356,15 +1368,15 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
   
 </div>
 
-<div className="mt-2 sm:hidden">
- <button 
-  onClick={toggleFullscreen}
-  className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
->
-  {isFullscreen ? 'Mostra barra di navigazione' : 'Nascondi barra di navigazione'}
-</button>
-</div>
 
+<div className="mt-2 sm:hidden">
+  <button 
+    onClick={toggleFullscreen}
+    className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+  >
+    {isFullscreen ? 'Esci da Fullscreen' : 'Vai a Fullscreen'}
+  </button>
+</div>
 </div>
 
 
