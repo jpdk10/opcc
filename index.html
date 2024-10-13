@@ -463,23 +463,6 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
-
-
-          const goFullScreen = () => {
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen();
-  } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-    document.documentElement.mozRequestFullScreen();
-  } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari & Opera
-    document.documentElement.webkitRequestFullscreen();
-  } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-    document.documentElement.msRequestFullscreen();
-  }
-};
-
-          const isMobile = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-};
         
         const [utilityPopupVisible, setUtilityPopupVisible] = React.useState(false);
 const [shopPopupVisible, setShopPopupVisible] = React.useState(false);
@@ -573,13 +556,6 @@ function handleSignoutClick() {
         });
     }
 }
-
-
-          React.useEffect(() => {
-  if (isMobile()) {
-    goFullScreen();
-  }
-}, []);
 
 
 
@@ -1183,27 +1159,6 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
     const [jumpToPage, setJumpToPage] = React.useState('');
     const pageNumbers = [];
     const maxPagesToShow = 5;
-
-
-      const CardCollectionApp = () => {
-  // ... (codice esistente)
-
-  const goFullScreen = () => {
-    // ... (codice della funzione goFullScreen)
-  };
-
-  const isMobile = () => {
-    // ... (codice della funzione isMobile)
-  };
-
-  React.useEffect(() => {
-    if (isMobile()) {
-      goFullScreen();
-    }
-  }, []);
-
-  // ... (resto del codice del componente)
-};
 
     // Logica per generare i numeri di pagina (come prima)
     if (totalPages <= maxPagesToShow) {
