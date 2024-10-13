@@ -463,7 +463,7 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 
 
       const CardCollectionApp = () => {
-       const [isFullscreen, setIsFullscreen] = React.useState(false);
+      const [isFullscreen, setIsFullscreen] = React.useState(false);
 
 const toggleFullscreen = () => {
   if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
@@ -485,20 +485,9 @@ const toggleFullscreen = () => {
         document.exitFullscreen();
       }
     }
+    setIsFullscreen(!isFullscreen);
   }
 };
-
-// Aggiungi questo effetto per gestire il cambio di fullscreen su dispositivi non iOS
-React.useEffect(() => {
-  const handleFullscreenChange = () => {
-    setIsFullscreen(!!document.fullscreenElement);
-  };
-
-  if (!navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }
-}, []);
 
 
 
