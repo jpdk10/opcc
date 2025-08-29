@@ -521,6 +521,59 @@ const [selectedSetsToPrint, setSelectedSetsToPrint] = React.useState([]);
     const [isSignedIn, setIsSignedIn] = React.useState(false);
            const [tokenClient, setTokenClient] = React.useState(null);
 
+          const [shopFormData, setShopFormData] = React.useState({
+    carta: '',
+    set: '',
+    numero: ''
+});
+
+          const handleShopFormChange = (e) => {
+    const { name, value } = e.target;
+    setShopFormData(prev => ({ ...prev, [name]: value }));
+};
+
+const handleShopSearch = (e) => {
+    e.preventDefault();
+    const { carta, set, numero } = shopFormData;
+    
+    if (!carta.trim()) {
+        alert('Inserisci almeno il nome della carta');
+        return;
+    }
+    
+    // Costruire la query di ricerca
+    let searchQuery = carta.trim();
+    if (set.trim()) {
+        searchQuery += ` ${set.trim()}`;
+    }
+    if (numero.trim()) {
+        searchQuery += ` ${numero.trim()}`;
+    }
+    searchQuery += ' card market';
+    
+    // Aprire Google in una nuova scheda
+    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+    window.open(googleSearchUrl, '_blank');
+    
+    // Reset del form
+    setShopFormData({
+        carta: '',
+        set: '',
+        numero: ''
+    });
+    
+    // Chiudere il popup
+    setShopPopupVisible(false);
+};
+
+const resetShopForm = () => {
+    setShopFormData({
+        carta: '',
+        set: '',
+        numero: ''
+    });
+};
+
           
 const clearCache = () => {
     localStorage.removeItem('cardCollection');
@@ -1360,16 +1413,63 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 )}
 
 {shopPopupVisible && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-lg">
-      <h2 className="text-xl font-bold mb-4 text-black">Shop</h2>
-      <p className="text-black mb-4">Contenuto dello Shop (da implementare)</p>
-      <button 
-        onClick={() => setShopPopupVisible(false)}
-        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-      >
-        Chiudi
-      </button>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white p-6 rounded-lg w-full max-w-md">
+      <h2 className="text-xl font-bold mb-4 text-black">Cerca su Card Market</h2>
+      <form onSubmit={handleShopSearch} className="space-y-4">
+        <div>
+          <label className="block mb-1 text-black font-medium">Nome Carta *</label>
+          <input
+            type="text"
+            name="carta"
+            value={shopFormData.carta}
+            onChange={handleShopFormChange}
+            className="w-full px-3 py-2 border rounded text-black"
+            placeholder="Nome della carta"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-black font-medium">Set</label>
+          <input
+            type="text"
+            name="set"
+            value={shopFormData.set}
+            onChange={handleShopFormChange}
+            className="w-full px-3 py-2 border rounded text-black"
+            placeholder="Set (opzionale)"
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-black font-medium">Numero</label>
+          <input
+            type="text"
+            name="numero"
+            value={shopFormData.numero}
+            onChange={handleShopFormChange}
+            className="w-full px-3 py-2 border rounded text-black"
+            placeholder="Numero carta (opzionale)"
+          />
+        </div>
+        <div className="flex space-x-2">
+          <button 
+            type="button"
+            onClick={() => {
+              resetShopForm();
+              setShopPopupVisible(false);
+            }}
+            className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+          >
+            Annulla
+          </button>
+          <button 
+            type="submit"
+            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Cerca
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 )}
