@@ -269,39 +269,19 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                     <span className="text-white text-sm">Immagine selezionata</span>
                 </div>
             )}
-                 <div className="flex items-center">
-                <input
-                    type="checkbox"
-                    id="missing"
-                    name="missing"
-                    checked={card.missing}
-                    onChange={onInputChange}
-                    className="mr-2"
-                />
-                <label htmlFor="missing" className="text-white mr-4">Manca</label>
-
-                <input
-                    type="checkbox"
-                    id="special"
-                    name="special"
-                    checked={card.special}
-                    onChange={onInputChange}
-                    className="mr-2"
-                />
-                <label htmlFor="special" className="text-white mr-4">Special</label>
-
-                <input
-                    type="checkbox"
-                    id="favorite"
-                    name="favorite"
-                    checked={card.favorite}
-                    onChange={onInputChange}
-                    className="mr-2"
-                />
-                <label htmlFor="favorite" className="text-white flex items-center">
-                    Preferiti <span className="ml-1">⭐</span>
-                </label>
-            </div>
+                <div className="flex items-center">
+    <input
+        type="checkbox"
+        id="favorite"
+        name="favorite"
+        checked={card.favorite}
+        onChange={onInputChange}
+        className="mr-2"
+    />
+    <label htmlFor="favorite" className="text-white flex items-center">
+        Preferiti <span className="ml-1">⭐</span>
+    </label>
+</div>
 
                 <div className="col-span-1 sm:col-span-2">
     <label className="block mb-1 text-white">Note</label>
