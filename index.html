@@ -1098,12 +1098,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         </span>
     )}
 </p>
-                </div>
-                {card.missing && (
-                    <p className="text-sm font-bold text-red-500 bg-white px-2 py-1 rounded absolute top-2 right-2 z-10">
-                        MANCA
-                    </p>
-                )}
+             
                      <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
                     <button 
                         onClick={(e) => {
