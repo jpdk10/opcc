@@ -494,15 +494,12 @@ const [newCard, setNewCard] = React.useState({
     version: '',
     language: 'ENG',
     image: null,
-    missing: false,
     color: '',
     notes: '',
-    special: false,
     favorite: false,
-    ogSet: '',  // Aggiungi questo
-    ogCardNumber: '',  // Aggiungi questo
-    isDon: false  // Aggiungi questo campo
-    
+    ogSet: '',
+    ogCardNumber: '',
+    isDon: false
 });
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [activeSet, setActiveSet] = React.useState('ALL');
@@ -649,7 +646,7 @@ async function saveToGoogleSheets() {
        const range = 'Andrea!A2:O';
 
 
-  const values = cards.map(card => [
+const values = cards.map(card => [
     card.id,
     card.name,
     card.set,
@@ -657,15 +654,12 @@ async function saveToGoogleSheets() {
     card.version,
     card.language,
     card.image,
-    card.missing ? 'Yes' : 'No',
     card.color,
     card.notes,
-    card.special ? 'Yes' : 'No',
     card.favorite ? 'Yes' : 'No',
-    card.ogSet,  // Aggiungi questo
-    card.ogCardNumber,  // Aggiungi questo
-    card.isDon ? 'Yes' : 'No'  // Aggiungi questo
-    
+    card.ogSet,
+    card.ogCardNumber,
+    card.isDon ? 'Yes' : 'No'
 ]);
 
       console.log('Attempting to save to Google Sheets...');
@@ -743,15 +737,12 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
     version: row[4] || '',
     language: row[5] || 'ENG',
     image: row[6] || null,
-    missing: row[7] === 'Yes',
-    color: row[8] || '',
-    notes: row[9] || '',
-    special: row[10] === 'Yes',
-    favorite: row[11] === 'Yes',
-    ogSet: row[12] || '',  // Aggiungi questo
-    ogCardNumber: row[13] || '',  // Aggiungi questo
-    isDon: row[14] === 'Yes'  // Aggiungi questo (assumendo che sia la 15a colonna)
-    
+    color: row[7] || '',
+    notes: row[8] || '',
+    favorite: row[9] === 'Yes',
+    ogSet: row[10] || '',
+    ogCardNumber: row[11] || '',
+    isDon: row[12] === 'Yes'
 }));
 
         console.log('Loaded cards:', loadedCards);
@@ -1015,7 +1006,7 @@ updatedCards.sort((a, b) => {
         
       setCards(updatedCards);
         saveToGoogleSheets();
- setNewCard({
+setNewCard({
     id: null,
     name: '',
     set: '',
@@ -1023,10 +1014,8 @@ updatedCards.sort((a, b) => {
     version: '',
     language: 'ENG',
     image: null,
-    missing: false,
     color: '',
     notes: '',
-    special: false,
     favorite: false,
     ogSet: '',
     ogCardNumber: '',
@@ -1082,13 +1071,9 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {Array.isArray(cards) && cards.map((card) => (
        
-            <div 
+<div 
     key={card.id}
-    className={`relative ${card.isDon ? 'bg-white' : card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col
-                ${card.missing ? 'grayscale hover:grayscale-0' : ''} cursor-pointer`}
-    style={{
-        boxShadow: card.missing ? '0 0 0 2px red' : 'none'
-    }}
+    className={`relative ${card.isDon ? 'bg-white' : card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer`}
     onClick={() => onCardClick(card)}
 >
                 <div className="relative pt-[100%] w-full mt-4">
@@ -1496,10 +1481,8 @@ setNewCard({
     version: '',
     language: 'ENG',
     image: null,
-    missing: false,
     color: '',
     notes: '',
-    special: false,
     favorite: false,
     isDon: false,
     ogSet: '',
@@ -1623,19 +1606,17 @@ setNewCard({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
             <div className="bg-gray-800 p-6 rounded-lg w-full max-w-xs border-2 border-gray-300">
                 <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2>
-                <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-                    <p><span className="font-bold">Set:</span> {card.set}</p>
-                    <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
-                    <p><span className="font-bold">Versione:</span> {card.version}</p>
-                    <p><span className="font-bold">Lingua:</span> {card.language}</p>
-                    <p><span className="font-bold">Mancante:</span> {card.missing ? 'Sì' : 'No'}</p>
-                    <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
-                    <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
-                    <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
-                    <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
-                    {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
-                    {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
-                </div>
+               <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+    <p><span className="font-bold">Set:</span> {card.set}</p>
+    <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
+    <p><span className="font-bold">Versione:</span> {card.version}</p>
+    <p><span className="font-bold">Lingua:</span> {card.language}</p>
+    <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
+    <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
+    <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
+    {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
+    {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
+</div>
                 {card.notes && (
                     <div className="mb-4">
                         <h3 className="text-lg font-semibold mb-2 text-white">Note:</h3>
