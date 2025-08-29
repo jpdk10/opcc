@@ -24,7 +24,11 @@
     <script type="text/babel">
 
 
-  
+       const initialSetOptions = [ 'ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
+        'EPB01', 'PRB01', 'ST01', 'ST02', 'ST03', 'ST04', 'ST05', 'ST06', 'ST07', 'ST08', 
+        'ST09', 'ST10', 'ST11', 'ST12', 'ST13', 'Promo', 'Unnumbered Promo', 'Judge Promo', 
+        'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
+    ];
         const versionOptions = ['V1', 'V2', 'V3'];
         const languageOptions = ['ENG', 'JAP', 'CHI'];
         const colorOptions = [
@@ -37,7 +41,8 @@
         ];
 
 const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setOptions, onAddCustomSet }) => {
-
+    const [isAddingCustomSet, setIsAddingCustomSet] = React.useState(false);
+    const [customSet, setCustomSet] = React.useState('');
     const [imageLink, setImageLink] = React.useState('');
     const [previewImage, setPreviewImage] = React.useState(null);
     
@@ -48,8 +53,23 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
         }
     }, [card.image]);
 
-  
+    const handleSetChange = (e) => {
+        const value = e.target.value;
+        if (value === 'add_custom') {
+            setIsAddingCustomSet(true);
+        } else {
+            onInputChange(e);
+        }
+    };
 
+    const handleCustomSetSubmit = () => {
+        if (customSet.trim() !== '') {
+            onAddCustomSet(customSet.trim());
+            onInputChange({ target: { name: 'set', value: customSet.trim() } });
+            setIsAddingCustomSet(false);
+            setCustomSet('');
+        }
+    };
 
     const handleImageLinkChange = (e) => {
         setImageLink(e.target.value);
@@ -80,16 +100,6 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
         onImageChange({ target: { type: 'remove' } });
     };
 
-    const generateDynamicSets = React.useCallback(() => {
-    if (!Array.isArray(cards) || cards.length === 0) {
-        return ['ALL'];
-    }
-    
-    const uniqueSets = [...new Set(cards.map(card => card.set).filter(set => set && set.trim() !== ''))];
-    uniqueSets.sort(); // Ordina alfabeticamente
-    return ['ALL', ...uniqueSets];
-}, [cards]);
-
    return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -105,14 +115,38 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                     </div>
                     <div>
                         <label className="block mb-1 text-white">Set</label>
-                       <input
-    type="text"
-    name="set"
-    value={card.set}
-    onChange={onInputChange}
-    className="w-full px-3 py-2 border rounded text-black"
-    placeholder="Nome del set"
-/>
+                        {isAddingCustomSet ? (
+                            <div className="flex">
+                                <input
+                                    type="text"
+                                    value={customSet}
+                                    onChange={(e) => setCustomSet(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-l text-black"
+                                    placeholder="Nuovo set"
+                                />
+                                <button
+                                    onClick={handleCustomSetSubmit}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600"
+                                >
+                                    Aggiungi
+                                </button>
+                            </div>
+                        ) : (
+                          <select
+            name="set"
+            value={card.set}
+            onChange={handleSetChange}
+            className="w-full px-3 py-2 border rounded text-black"
+          >
+            <option value="">Seleziona un set</option>
+            {setOptions.filter(set => set !== 'ALL').map((option) => (
+              <option key={option} value={option}>
+                {getSetIcon(option)} {option}
+              </option>
+            ))}
+            <option value="add_custom">Aggiungi altro...</option>
+          </select>
+        )}
       </div>
       
       <div className="flex items-center mt-2">
@@ -471,7 +505,7 @@ const [newCard, setNewCard] = React.useState({
     const [activeSet, setActiveSet] = React.useState('ALL');
     const [searchTerm, setSearchTerm] = React.useState('');
     const [isFormVisible, setIsFormVisible] = React.useState(false);
-   const dynamicSets = generateDynamicSets();
+    const [setOptions, setSetOptions] = React.useState(initialSetOptions);
     const [loadedFileName, setLoadedFileName] = React.useState(null);
     const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false);
     const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
@@ -838,7 +872,9 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
                        setCards(formattedCards);
   saveToGoogleSheets(); // Aggiungi questa riga
                         
-             
+                        // Update setOptions with any new sets from the Excel file
+                        const newSets = [...new Set(formattedCards.map(card => card.set))];
+                        setSetOptions(prevSets => [...new Set([...prevSets, ...newSets])]);
 
                         setLoadedFileName(file.name);
                     };
@@ -919,17 +955,31 @@ const handlePrint = () => {
     printWindow.print();
 };
 
-        const handleFileEject = () => {
-    setCards([]);
-    setLoadedFileName(null);
-};
+            const handleFileEject = () => {
+                 setCards([]);
+                setSetOptions(initialSetOptions);
+                setLoadedFileName(null);
+            };
 
-      React.useEffect(() => {
-    const savedCards = localStorage.getItem('cardCollection');
-    if (savedCards) {
-        setCards(JSON.parse(savedCards));
-    }
-}, []);
+          React.useEffect(() => {
+                const savedCards = localStorage.getItem('cardCollection');
+                const savedSets = localStorage.getItem('customSets');
+                if (savedCards) {
+                    setCards(JSON.parse(savedCards));
+                }
+                if (savedSets) {
+                    setSetOptions([...initialSetOptions, ...JSON.parse(savedSets)]);
+                }
+            }, []);
+
+            React.useEffect(() => {
+                localStorage.setItem('cardCollection', JSON.stringify(cards));
+            }, [cards]);
+
+            React.useEffect(() => {
+                const customSets = setOptions.filter(set => !initialSetOptions.includes(set));
+                localStorage.setItem('customSets', JSON.stringify(customSets));
+            }, [setOptions]);
             
       React.useEffect(() => {
   // Removed collection dependency since selector is removed
@@ -1044,7 +1094,11 @@ setNewCard({
 saveToGoogleSheets(); // Aggiungi questa riga
             };
 
-          
+            const addCustomSet = (newSet) => {
+                if (!setOptions.includes(newSet)) {
+                    setSetOptions(prev => [...prev, newSet]);
+                }
+            };
             
               const getFlagEmoji = (language) => {
                 switch (language) {
@@ -1604,8 +1658,8 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
                 onInputChange={handleInputChange}
                 onImageChange={handleImageChange}
                 onSubmit={addOrUpdateCard}
-       
-          
+                onAddCustomSet={addCustomSet}
+                setOptions={setOptions}
                 onCancel={() => {
 setNewCard({
     id: null,
@@ -1681,15 +1735,15 @@ setNewCard({
              <div className="mb-6 pt-4 border-2 border-t-amber-400 border-r-0 border-l-0 border-b-0"> {/* Aumentato il margine inferiore */}
                 <div className="overflow-x-auto scrolling-touch mb-2 pb-2"> {/* Aggiunto margine inferiore */}
                     <div className="flex whitespace-nowrap">
-                        {dynamicSets.map((set) => (
-    <button
-        key={set}
-        onClick={() => setActiveSet(set)}
-        className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
-    >
-        {getSetIcon(set)} {set}
-    </button>
-))}
+                        {initialSetOptions.map((set) => (
+                            <button
+                                key={set}
+                                onClick={() => setActiveSet(set)}
+                                className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                            >
+                                {set}
+                            </button>
+                        ))}
                     </div>
                 </div>
                
@@ -1737,8 +1791,8 @@ setNewCard({
                 onInputChange={handleInputChange}
                 onImageChange={handleImageChange}
                 onSubmit={addOrUpdateCard}
-   
-             
+                onAddCustomSet={addCustomSet}
+                setOptions={setOptions}
                 onCancel={() => setIsEditDialogOpen(false)} 
             />
         </div>
@@ -1750,10 +1804,10 @@ setNewCard({
                         onExport={handleExcelExport}
                     />
                     
-        <PrintDialog
+                    <PrintDialog
     isOpen={isPrintDialogOpen}
     onClose={togglePrintDialog}
-    sets={dynamicSets.filter(set => set !== 'ALL')}
+    sets={setOptions}
     selectedSets={selectedSetsToPrint}
     onSetToggle={handleSetSelection}
     onPrint={() => {
@@ -1761,7 +1815,6 @@ setNewCard({
         togglePrintDialog();
     }}
 />
-
 
                 </div>
             );
