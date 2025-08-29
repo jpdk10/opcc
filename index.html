@@ -896,9 +896,9 @@ const handleSetSelection = (set) => {
     );
 };
 
-const generatePrintableMissingCards = () => {
+const generatePrintableCards = () => {
     return cards.filter(card => 
-        card.missing && selectedSetsToPrint.includes(card.set)
+        selectedSetsToPrint.includes(card.set)
     ).map(card => ({
         name: card.name,
         set: card.set,
@@ -908,12 +908,12 @@ const generatePrintableMissingCards = () => {
 };
 
 const handlePrint = () => {
-    const missingCards = generatePrintableMissingCards();
+    const cardsToprint = generatePrintableCards();
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
             <head>
-                <title>Carte Mancanti</title>
+                <title>Carte Collezione</title>
                 <style>
                     table { border-collapse: collapse; width: 100%; }
                     th, td { border: 1px solid black; padding: 8px; text-align: left; }
@@ -921,7 +921,7 @@ const handlePrint = () => {
                 </style>
             </head>
             <body>
-                <h1>Mancanti</h1>
+                <h1>Carte Collezione - Set Selezionati</h1>
                 <table>
                     <thead>
                         <tr>
@@ -934,7 +934,7 @@ const handlePrint = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        ${missingCards.map(card => `
+                        ${cardsToprint.map(card => `
                             <tr>
                                 <td>${card.name}</td>
                                 <td>${card.set}</td>
