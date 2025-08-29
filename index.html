@@ -526,7 +526,9 @@ const [selectedSetsToPrint, setSelectedSetsToPrint] = React.useState([]);
     set: '',
     numero: ''
 });
+          const [viewMode, setViewMode] = React.useState('grid'); // 'grid' o 'list'
 
+        
           const handleShopFormChange = (e) => {
     const { name, value } = e.target;
     setShopFormData(prev => ({ ...prev, [name]: value }));
@@ -1177,6 +1179,96 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         ))}
     </div>
 );
+          const CardList = ({ cards, onCardClick, onEditCard, onDeleteCard }) => (
+    <div className="space-y-4">
+        {Array.isArray(cards) && cards.map((card) => (
+            <div 
+                key={card.id}
+                className={`relative ${card.isDon ? 'bg-white' : card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex cursor-pointer p-4`}
+                onClick={() => onCardClick(card)}
+            >
+   
+                <div className="flex-shrink-0 w-20 h-28 mr-4">
+                    {card.image ? (
+                        <img 
+                            src={card.image} 
+                            alt={card.name} 
+                            className="w-full h-full object-contain rounded"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
+                            <span className="text-xs text-gray-600">No Image</span>
+                        </div>
+                    )}
+                </div>
+
+           
+                <div className="flex-grow">
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className={`font-bold text-lg ${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            {card.name.toUpperCase()} ({card.version}) {getFlagEmoji(card.language)}
+                        </h3>
+                        {card.isDon && (
+                            <span className="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold ml-2">
+                                DON!!
+                            </span>
+                        )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                        <p className={`${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Set:</span> {card.set}
+                        </p>
+                        <p className={`${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Numero:</span> {card.cardNumber}
+                        </p>
+                        <p className={`${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Lingua:</span> {card.language}
+                        </p>
+                        <p className={`${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Preferito:</span> {card.favorite ? '⭐' : 'No'}
+                        </p>
+                    </div>
+
+                    {card.ogSet && (
+                        <p className={`text-sm mt-1 ${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Originale:</span> {card.ogSet} - {card.ogCardNumber}
+                        </p>
+                    )}
+
+                    {card.notes && (
+                        <p className={`text-sm mt-2 ${card.isDon ? 'text-black' : 'text-white'} ${!card.isDon && 'text-shadow'}`}>
+                            <span className="font-semibold">Note:</span> {card.notes}
+                        </p>
+                    )}
+                </div>
+
+  
+                <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditCard(card);
+                        }} 
+                        className="text-white mr-2 hover:text-blue-300 text-shadow"
+                    >
+                        Edit
+                    </button>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteCard(card.id);
+                        }} 
+                        className="text-white hover:text-red-300 text-shadow"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        ))}
+    </div>
+
+);
 
 
   const Pagination = ({ currentPage, totalPages, paginate }) => {
@@ -1612,6 +1704,34 @@ setNewCard({
     </div>
 </div>
             </div>
+<div className="mb-4 flex justify-between items-center">
+    <div className="flex items-center space-x-2">
+        <span className={`text-sm ${theme === 'standard' ? 'text-white' : 'text-pink-800'}`}>Vista:</span>
+        <button
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-1 rounded text-sm ${
+                viewMode === 'grid' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-200 text-black hover:bg-gray-300'
+            }`}
+        >
+            Griglia
+        </button>
+        <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-1 rounded text-sm ${
+                viewMode === 'list' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-200 text-black hover:bg-gray-300'
+            }`}
+        >
+            Elenco
+        </button>
+    </div>
+</div>
+
+
+            
              <div className="mb-6 pt-4 border-2 border-t-amber-400 border-r-0 border-l-0 border-b-0"> {/* Aumentato il margine inferiore */}
                 <div className="overflow-x-auto scrolling-touch mb-2 pb-2"> {/* Aggiunto margine inferiore */}
                     <div className="flex whitespace-nowrap">
@@ -1630,12 +1750,21 @@ setNewCard({
             </div>
 
             {/* Griglia delle carte */}
-           <CardGrid 
-                cards={currentCards} 
-                onCardClick={handleCardClick}
-                onEditCard={handleEditCard}
-                onDeleteCard={deleteCard}
-            />
+      {viewMode === 'grid' ? (
+    <CardGrid 
+        cards={currentCards} 
+        onCardClick={handleCardClick}
+        onEditCard={handleEditCard}
+        onDeleteCard={deleteCard}
+    />
+) : (
+    <CardList 
+        cards={currentCards} 
+        onCardClick={handleCardClick}
+        onEditCard={handleEditCard}
+        onDeleteCard={deleteCard}
+    />
+)}
             <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
             {selectedCard && (
                 <CardDetails card={selectedCard} onClose={handleCloseCardDetails} />
