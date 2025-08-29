@@ -534,10 +534,10 @@ const [newCard, setNewCard] = React.useState({
     const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
 const [selectedSetsToPrint, setSelectedSetsToPrint] = React.useState([]);
     
-const [showMissingOnly, setShowMissingOnly] = React.useState(false);
-    const [showNonV1Only, setShowNonV1Only] = React.useState(false);
+
+
     
-      const [showSpecialOnly, setShowSpecialOnly] = React.useState(false);
+  
     const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
     
     
@@ -793,7 +793,7 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
     document.body.style.backgroundColor = theme === 'standard' ? 'black' : '#FFC0CB';
 }, [theme]);
     
-    React.useEffect(() => {
+ React.useEffect(() => {
     const handleKeyPress = (event) => {
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
             return;
@@ -805,9 +805,6 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
                 break;
             case 'l':
                 document.getElementById('excelUpload').click();
-                break;
-            case 'm':
-                setShowMissingOnly(prev => !prev);
                 break;
             default:
                 break;
@@ -1091,9 +1088,6 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
     (activeSet === 'ALL' || card.set === activeSet) &&
     ((card.name && card.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
      (card.cardNumber && card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-    (!showMissingOnly || card.missing) &&
-    (!showNonV1Only || (card.version && card.version !== 'V1')) &&
-    (!showSpecialOnly || card.special) &&
     (!showFavoritesOnly || card.favorite)
 ) : [];
 
@@ -1545,55 +1539,19 @@ setNewCard({
                     className="w-full px-3 py-2 border rounded text-black mb-2"
                 />
                 <div className="flex items-center space-x-4 flex-wrap">
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="showMissingOnly"
-                            checked={showMissingOnly}
-                            onChange={(e) => setShowMissingOnly(e.target.checked)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="showMissingOnly" className="text-white">
-                            Manca (M)
-                        </label>
-                    </div>
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="showNonV1Only"
-                            checked={showNonV1Only}
-                            onChange={(e) => setShowNonV1Only(e.target.checked)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="showNonV1Only" className="text-white">
-                            Alternative 
-                        </label>
-                    </div>
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="showSpecialOnly"
-                            checked={showSpecialOnly}
-                            onChange={(e) => setShowSpecialOnly(e.target.checked)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="showSpecialOnly" className="text-white">
-                            Special
-                        </label>
-                    </div>
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="showFavoritesOnly"
-                            checked={showFavoritesOnly}
-                            onChange={(e) => setShowFavoritesOnly(e.target.checked)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="showFavoritesOnly" className="text-white flex items-center">
-                            Preferiti <span className="ml-1">⭐</span>
-                        </label>
-                    </div>
-                </div>
+    <div className="flex items-center">
+        <input
+            type="checkbox"
+            id="showFavoritesOnly"
+            checked={showFavoritesOnly}
+            onChange={(e) => setShowFavoritesOnly(e.target.checked)}
+            className="mr-2"
+        />
+        <label htmlFor="showFavoritesOnly" className="text-white flex items-center">
+            Preferiti <span className="ml-1">⭐</span>
+        </label>
+    </div>
+</div>
             </div>
              <div className="mb-6 pt-4 border-2 border-t-amber-400 border-r-0 border-l-0 border-b-0"> {/* Aumentato il margine inferiore */}
                 <div className="overflow-x-auto scrolling-touch mb-2 pb-2"> {/* Aggiunto margine inferiore */}
