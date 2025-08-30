@@ -16,22 +16,48 @@
         .scrolling-touch { -webkit-overflow-scrolling: touch; }
         .drag-over { border: 2px dashed #4a5568; }
         body { background-color: black; color: white; }
-        .combo-red-500-green-500 { background: linear-gradient(90deg, #ef4444 50%, #22c55e 50%); }
+      
+/* ROSSO + altri colori */
+.combo-red-500-green-500 { background: linear-gradient(90deg, #ef4444 50%, #22c55e 50%); }
 .combo-red-500-blue-500 { background: linear-gradient(90deg, #ef4444 50%, #3b82f6 50%); }
 .combo-red-500-purple-500 { background: linear-gradient(90deg, #ef4444 50%, #a855f7 50%); }
 .combo-red-500-gray-700 { background: linear-gradient(90deg, #ef4444 50%, #374151 50%); }
 .combo-red-500-yellow-400 { background: linear-gradient(90deg, #ef4444 50%, #facc15 50%); }
+
+/* VERDE + altri colori */
+.combo-green-500-red-500 { background: linear-gradient(90deg, #22c55e 50%, #ef4444 50%); }
 .combo-green-500-blue-500 { background: linear-gradient(90deg, #22c55e 50%, #3b82f6 50%); }
 .combo-green-500-purple-500 { background: linear-gradient(90deg, #22c55e 50%, #a855f7 50%); }
 .combo-green-500-gray-700 { background: linear-gradient(90deg, #22c55e 50%, #374151 50%); }
 .combo-green-500-yellow-400 { background: linear-gradient(90deg, #22c55e 50%, #facc15 50%); }
+
+/* AZZURRO + altri colori */
+.combo-blue-500-red-500 { background: linear-gradient(90deg, #3b82f6 50%, #ef4444 50%); }
+.combo-blue-500-green-500 { background: linear-gradient(90deg, #3b82f6 50%, #22c55e 50%); }
 .combo-blue-500-purple-500 { background: linear-gradient(90deg, #3b82f6 50%, #a855f7 50%); }
 .combo-blue-500-gray-700 { background: linear-gradient(90deg, #3b82f6 50%, #374151 50%); }
 .combo-blue-500-yellow-400 { background: linear-gradient(90deg, #3b82f6 50%, #facc15 50%); }
+
+/* VIOLA + altri colori */
+.combo-purple-500-red-500 { background: linear-gradient(90deg, #a855f7 50%, #ef4444 50%); }
+.combo-purple-500-green-500 { background: linear-gradient(90deg, #a855f7 50%, #22c55e 50%); }
+.combo-purple-500-blue-500 { background: linear-gradient(90deg, #a855f7 50%, #3b82f6 50%); }
 .combo-purple-500-gray-700 { background: linear-gradient(90deg, #a855f7 50%, #374151 50%); }
 .combo-purple-500-yellow-400 { background: linear-gradient(90deg, #a855f7 50%, #facc15 50%); }
+
+/* NERO + altri colori */
+.combo-gray-700-red-500 { background: linear-gradient(90deg, #374151 50%, #ef4444 50%); }
+.combo-gray-700-green-500 { background: linear-gradient(90deg, #374151 50%, #22c55e 50%); }
+.combo-gray-700-blue-500 { background: linear-gradient(90deg, #374151 50%, #3b82f6 50%); }
+.combo-gray-700-purple-500 { background: linear-gradient(90deg, #374151 50%, #a855f7 50%); }
 .combo-gray-700-yellow-400 { background: linear-gradient(90deg, #374151 50%, #facc15 50%); }
 
+/* GIALLO + altri colori */
+.combo-yellow-400-red-500 { background: linear-gradient(90deg, #facc15 50%, #ef4444 50%); }
+.combo-yellow-400-green-500 { background: linear-gradient(90deg, #facc15 50%, #22c55e 50%); }
+.combo-yellow-400-blue-500 { background: linear-gradient(90deg, #facc15 50%, #3b82f6 50%); }
+.combo-yellow-400-purple-500 { background: linear-gradient(90deg, #facc15 50%, #a855f7 50%); }
+.combo-yellow-400-gray-700 { background: linear-gradient(90deg, #facc15 50%, #374151 50%); }
     </style>
 </head>
 <body>
@@ -69,20 +95,20 @@ const generateColorOptions = () => {
         });
     });
     
-    // Combinazioni (ogni colore con tutti gli altri)
-    for (let i = 0; i < baseColors.length; i++) {
-        for (let j = i + 1; j < baseColors.length; j++) {
-            const color1 = baseColors[i];
-            const color2 = baseColors[j];
-            options.push({
-                name: `${color1.name}+${color2.name}`,
-                value: `combo-${color1.class}-${color2.class}`,
-                isCombo: true,
-                color1: color1.class,
-                color2: color2.class
-            });
-        }
-    }
+    // Combinazioni complete: ogni colore con tutti gli altri (A+B e B+A)
+    baseColors.forEach((color1, i) => {
+        baseColors.forEach((color2, j) => {
+            if (i !== j) { // Escludi combinazioni di un colore con se stesso
+                options.push({
+                    name: `${color1.name}+${color2.name}`,
+                    value: `combo-${color1.class}-${color2.class}`,
+                    isCombo: true,
+                    color1: color1.class,
+                    color2: color2.class
+                });
+            }
+        });
+    });
     
     // Special sempre alla fine
     options.push({
