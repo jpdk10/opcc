@@ -1851,11 +1851,17 @@ setNewCard({
             );
         };
         
-     const CardDetails = ({ card, onClose }) => {
+   const CardDetails = ({ card, onClose }) => {
     const handleOutsideClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
+    };
+
+    const handleMarketSearch = () => {
+        const searchQuery = `${card.name} ${card.set} ${card.cardNumber} cardmarket`;
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+        window.open(googleSearchUrl, '_blank');
     };
 
     return (
@@ -1883,9 +1889,14 @@ setNewCard({
                 {card.image && (
                     <img src={card.image} alt={card.name} className="max-w-full h-auto mb-4" />
                 )}
-                <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Chiudi
-                </button>
+                <div className="flex space-x-2">
+                    <button onClick={onClose} className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Chiudi
+                    </button>
+                    <button onClick={handleMarketSearch} className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        Cerca su Market
+                    </button>
+                </div>
             </div>
         </div>
     );
