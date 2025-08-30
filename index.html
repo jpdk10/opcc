@@ -16,6 +16,22 @@
         .scrolling-touch { -webkit-overflow-scrolling: touch; }
         .drag-over { border: 2px dashed #4a5568; }
         body { background-color: black; color: white; }
+        .combo-red-500-green-500 { background: linear-gradient(90deg, #ef4444 50%, #22c55e 50%); }
+.combo-red-500-blue-500 { background: linear-gradient(90deg, #ef4444 50%, #3b82f6 50%); }
+.combo-red-500-purple-500 { background: linear-gradient(90deg, #ef4444 50%, #a855f7 50%); }
+.combo-red-500-gray-700 { background: linear-gradient(90deg, #ef4444 50%, #374151 50%); }
+.combo-red-500-yellow-400 { background: linear-gradient(90deg, #ef4444 50%, #facc15 50%); }
+.combo-green-500-blue-500 { background: linear-gradient(90deg, #22c55e 50%, #3b82f6 50%); }
+.combo-green-500-purple-500 { background: linear-gradient(90deg, #22c55e 50%, #a855f7 50%); }
+.combo-green-500-gray-700 { background: linear-gradient(90deg, #22c55e 50%, #374151 50%); }
+.combo-green-500-yellow-400 { background: linear-gradient(90deg, #22c55e 50%, #facc15 50%); }
+.combo-blue-500-purple-500 { background: linear-gradient(90deg, #3b82f6 50%, #a855f7 50%); }
+.combo-blue-500-gray-700 { background: linear-gradient(90deg, #3b82f6 50%, #374151 50%); }
+.combo-blue-500-yellow-400 { background: linear-gradient(90deg, #3b82f6 50%, #facc15 50%); }
+.combo-purple-500-gray-700 { background: linear-gradient(90deg, #a855f7 50%, #374151 50%); }
+.combo-purple-500-yellow-400 { background: linear-gradient(90deg, #a855f7 50%, #facc15 50%); }
+.combo-gray-700-yellow-400 { background: linear-gradient(90deg, #374151 50%, #facc15 50%); }
+
     </style>
 </head>
 <body>
@@ -31,15 +47,54 @@
     ];
         const versionOptions = ['V1', 'V2', 'V3'];
         const languageOptions = ['ENG', 'JAP', 'CHI'];
-        const colorOptions = [
-            { name: 'ROSSO', value: 'bg-red-500' },
-             { name: 'VERDE', value: 'bg-green-500' },
-            { name: 'AZZURRO', value: 'bg-blue-500' },
-            { name: 'VIOLA', value: 'bg-purple-500' },
-            { name: 'NERO', value: 'bg-gray-700' },
-            { name: 'GIALLO', value: 'bg-yellow-400' },
-            { name: 'SPECIAL', value: 'bg-amber-400' }
-        ];
+        const baseColors = [
+    { name: 'ROSSO', value: 'bg-red-500', class: 'red-500' },
+    { name: 'VERDE', value: 'bg-green-500', class: 'green-500' },
+    { name: 'AZZURRO', value: 'bg-blue-500', class: 'blue-500' },
+    { name: 'VIOLA', value: 'bg-purple-500', class: 'purple-500' },
+    { name: 'NERO', value: 'bg-gray-700', class: 'gray-700' },
+    { name: 'GIALLO', value: 'bg-yellow-400', class: 'yellow-400' }
+];
+
+// Genera tutte le combinazioni + colori singoli + special
+const generateColorOptions = () => {
+    const options = [];
+    
+    // Colori singoli
+    baseColors.forEach(color => {
+        options.push({
+            name: color.name,
+            value: color.value,
+            isCombo: false
+        });
+    });
+    
+    // Combinazioni (ogni colore con tutti gli altri)
+    for (let i = 0; i < baseColors.length; i++) {
+        for (let j = i + 1; j < baseColors.length; j++) {
+            const color1 = baseColors[i];
+            const color2 = baseColors[j];
+            options.push({
+                name: `${color1.name}+${color2.name}`,
+                value: `combo-${color1.class}-${color2.class}`,
+                isCombo: true,
+                color1: color1.class,
+                color2: color2.class
+            });
+        }
+    }
+    
+    // Special sempre alla fine
+    options.push({
+        name: 'SPECIAL',
+        value: 'bg-amber-800',
+        isCombo: false
+    });
+    
+    return options;
+};
+
+const colorOptions = generateColorOptions();
 
 const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setOptions, onAddCustomSet }) => {
     const [isAddingCustomSet, setIsAddingCustomSet] = React.useState(false);
@@ -306,17 +361,19 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
     />
 </div>
                 <div>
-                    <label className="block mb-1 text-white">Colore</label>
-                    <div className="flex space-x-2">
-                        {colorOptions.map((color) => (
-                            <button
-                                key={color.value}
-                                className={`w-8 h-8 rounded-full ${color.value} ${card.color === color.value ? 'ring-2 ring-offset-2 ring-white' : ''}`}
-                                onClick={() => onInputChange({ target: { name: 'color', value: color.value } })}
-                            />
-                        ))}
-                    </div>
-                </div>
+    <label className="block mb-1 text-white">Colore</label>
+    <div className="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto">
+        {colorOptions.map((color) => (
+            <button
+                key={color.value}
+                className={`w-8 h-8 rounded-full ${color.isCombo ? '' : color.value} ${color.isCombo ? color.value : ''} ${card.color === color.value ? 'ring-2 ring-offset-2 ring-white' : ''}`}
+                style={color.isCombo ? {} : {}}
+                onClick={() => onInputChange({ target: { name: 'color', value: color.value } })}
+                title={color.name}
+            />
+        ))}
+    </div>
+</div>
                     <div className="col-span-1 sm:col-span-2 flex justify-end space-x-2">
                         <button onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded">Annulla</button>
                         <button onClick={onSubmit} className="px-4 py-2 bg-blue-500 text-white rounded">
@@ -1144,7 +1201,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
        
 <div 
     key={card.id}
-    className={`relative ${card.isDon ? 'bg-white' : card.color} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer`}
+    className={`relative ${card.isDon ? 'bg-white' : (card.color.startsWith('combo-') ? card.color : card.color)} rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer`}
     onClick={() => onCardClick(card)}
 >
                 <div className="relative pt-[100%] w-full mt-4">
@@ -1375,6 +1432,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         setSelectedCard(card);
     };
     
+
     const handleCloseCardDetails = () => {
         setSelectedCard(null);
     };
@@ -1851,6 +1909,11 @@ setNewCard({
             );
         };
         
+        const getColorName = (colorValue) => {
+    const colorOption = colorOptions.find(c => c.value === colorValue);
+    return colorOption ? colorOption.name : colorValue.replace('bg-', '');
+};
+        
    const CardDetails = ({ card, onClose }) => {
     const handleOutsideClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -1873,7 +1936,7 @@ setNewCard({
     <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
     <p><span className="font-bold">Versione:</span> {card.version}</p>
     <p><span className="font-bold">Lingua:</span> {card.language}</p>
-    <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
+    <p><span className="font-bold">Colore:</span> {getColorName(card.color)}</p>
     <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
 <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
     <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
