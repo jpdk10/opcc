@@ -270,7 +270,17 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                     <span className="text-white text-sm">Immagine selezionata</span>
                 </div>
             )}
-                <div className="flex items-center">
+              <div className="flex items-center">
+    <input
+        type="checkbox"
+        id="special"
+        name="special"
+        checked={card.special}
+        onChange={onInputChange}
+        className="mr-2"
+    />
+    <label htmlFor="special" className="text-white mr-4">Special</label>
+
     <input
         type="checkbox"
         id="favorite"
@@ -497,6 +507,7 @@ const [newCard, setNewCard] = React.useState({
     image: null,
     color: '',
     notes: '',
+    special: false,
     favorite: false,
     ogSet: '',
     ogCardNumber: '',
@@ -517,7 +528,7 @@ const [selectedSetsToPrint, setSelectedSetsToPrint] = React.useState([]);
     
   
     const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
-    
+    const [showSpecialOnly, setShowSpecialOnly] = React.useState(false);
     
     const [isSignedIn, setIsSignedIn] = React.useState(false);
            const [tokenClient, setTokenClient] = React.useState(null);
@@ -712,6 +723,7 @@ const values = cards.map(card => [
     card.image,
     card.color,
     card.notes,
+    card.special ? 'Yes' : 'No',  // AGGIUNGERE QUESTA RIGA
     card.favorite ? 'Yes' : 'No',
     card.ogSet,
     card.ogCardNumber,
@@ -786,7 +798,7 @@ const range = 'Andrea!A1:O'
         console.log('Raw data from Google Sheets:', data.values);
 
 const loadedCards = data.values.slice(1).map((row, index) => ({
-    id: row[0] || `${Date.now()}-${index}`,
+     id: row[0] || `${Date.now()}-${index}`,
     name: row[1] || '',
     set: row[2] || '',
     cardNumber: row[3] || '',
@@ -795,10 +807,11 @@ const loadedCards = data.values.slice(1).map((row, index) => ({
     image: row[6] || null,
     color: row[7] || '',
     notes: row[8] || '',
-    favorite: row[9] === 'Yes',
-    ogSet: row[10] || '',
-    ogCardNumber: row[11] || '',
-    isDon: row[12] === 'Yes'
+    special: row[9] === 'Yes',  // AGGIUNGERE QUESTA RIGA
+    favorite: row[10] === 'Yes',  // AGGIORNARE INDICE da 9 a 10
+    ogSet: row[11] || '',  // AGGIORNARE INDICE da 10 a 11
+    ogCardNumber: row[12] || '',  // AGGIORNARE INDICE da 11 a 12
+    isDon: row[13] === 'Yes'  // AGGIORNARE INDICE da 12 a 13
 }));
 
         console.log('Loaded cards:', loadedCards);
@@ -1072,6 +1085,7 @@ setNewCard({
     image: null,
     color: '',
     notes: '',
+    special: false,
     favorite: false,
     ogSet: '',
     ogCardNumber: '',
@@ -1113,6 +1127,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
     (activeSet === 'ALL' || card.set === activeSet) &&
     ((card.name && card.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
      (card.cardNumber && card.cardNumber.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    (!showSpecialOnly || card.special) &&
     (!showFavoritesOnly || card.favorite)
 ) : [];
 
@@ -1672,6 +1687,7 @@ setNewCard({
     image: null,
     color: '',
     notes: '',
+    special: false,
     favorite: false,
     isDon: false,
     ogSet: '',
@@ -1690,7 +1706,19 @@ setNewCard({
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-3 py-2 border rounded text-black mb-2"
                 />
-                <div className="flex items-center space-x-4 flex-wrap">
+<div className="flex items-center space-x-4 flex-wrap">
+    <div className="flex items-center">
+        <input
+            type="checkbox"
+            id="showSpecialOnly"
+            checked={showSpecialOnly}
+            onChange={(e) => setShowSpecialOnly(e.target.checked)}
+            className="mr-2"
+        />
+        <label htmlFor="showSpecialOnly" className="text-white">
+            Special
+        </label>
+    </div>
     <div className="flex items-center">
         <input
             type="checkbox"
@@ -1704,6 +1732,8 @@ setNewCard({
         </label>
     </div>
 </div>
+
+
             </div>
 <div className="mb-4 flex justify-between items-center">
     <div className="flex items-center space-x-2">
@@ -1838,7 +1868,8 @@ setNewCard({
     <p><span className="font-bold">Versione:</span> {card.version}</p>
     <p><span className="font-bold">Lingua:</span> {card.language}</p>
     <p><span className="font-bold">Colore:</span> {card.color.replace('bg-', '')}</p>
-    <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
+    <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
+<p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
     <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
     {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
     {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
