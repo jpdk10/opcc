@@ -534,6 +534,21 @@ const CardDetailPopup = ({ card, onClose, onSave }) => {
 };
 
 
+const Preloader = () => {
+    return (
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+            <div className="mb-8">
+                <img 
+                    src="https://raw.githubusercontent.com/jpdk10/opcc/refs/heads/main/logo_opcc.PNG" 
+                    alt="OPCC Logo" 
+                    className="w-32 h-32 object-contain"
+                />
+            </div>
+            <h2 className="text-white text-2xl font-bold">Benvenuto</h2>
+        </div>
+    );
+};
+
 
 
       const CardCollectionApp = () => {
@@ -1082,6 +1097,16 @@ const handlePrint = () => {
   // Removed collection dependency since selector is removed
 }, []);
 
+React.useEffect(() => {
+    // Simula il caricamento iniziale
+    const timer = setTimeout(() => {
+        setIsLoading(false);
+    }, 2000); // 2 secondi di preloader
+
+    return () => clearTimeout(timer);
+}, []);
+
+
             const handleInputChange = (e) => {
                 const { name, value, type, checked } = e.target;
                 setNewCard(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
@@ -1453,6 +1478,11 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         </div>
     );
 };
+
+const [isLoading, setIsLoading] = React.useState(true);
+
+
+
     
  const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -1467,6 +1497,9 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
         setIsEditDialogOpen(true);
     };
 
+if (isLoading) {
+    return <Preloader />;
+}
     
     return (
         <div className="container mx-auto p-4">
