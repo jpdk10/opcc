@@ -66,9 +66,8 @@
     <script type="text/babel">
 
 
-       const initialSetOptions = [ 'ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
-        'EPB01', 'PRB01', 'ST01', 'ST02', 'ST03', 'ST04', 'ST05', 'ST06', 'ST07', 'ST08', 
-        'ST09', 'ST10', 'ST11', 'ST12', 'ST13', 'Promo', 'Unnumbered Promo', 'Judge Promo', 
+       const initialSetOptions = [ 'ALL', 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'OP10', 'OP11', 'OP12', 'OP13',  
+        'EB01', 'EB02', 'PRB01', 'PRB02' , 'Promo', 'Unnumbered Promo', 'Judge Promo', 
         'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
     ];
         const versionOptions = ['V1', 'V2', 'V3'];
@@ -476,9 +475,10 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
     );
 };
 
+        
 
 const getSetIcon = (set) => {
-  if (['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'EPB01', 'PRB01'].includes(set)) {
+  if (['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'OP10', 'OP11', 'OP12', 'OP13', 'EB01', 'EB02', 'PRB01', 'PRB02'].includes(set)) {
     return '🔴'; // Icona rossa
   } else if (set.startsWith('ST')) {
     return '🔵'; // Icona blu
@@ -1136,9 +1136,8 @@ React.useEffect(() => {
       
         // Definire l'ordine dei set
              const setOrder = [
-                'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 
-                'EPB01', 'PRB01', 
-                'ST01', 'ST02', 'ST03', 'ST04', 'ST05', 'ST06', 'ST07', 'ST08', 'ST09', 'ST10', 'ST11', 'ST12', 'ST13', 
+                'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'OP10', 'OP11', 'OP12', 'OP13',  
+                'EB01', 'EB02', 'PRB01', 'PRB02' ,  
                 'Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
             ];
 
