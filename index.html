@@ -71,7 +71,7 @@
         'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
     ];
         const versionOptions = ['V1', 'V2', 'V3'];
-        const languageOptions = ['ENG', 'JAP', 'CHI'];
+        const languageOptions = ['ENG', 'JAP', 'CHI', 'FRA'];
         const baseColors = [
     { name: 'ROSSO', value: 'bg-red-500', class: 'red-500' },
     { name: 'VERDE', value: 'bg-green-500', class: 'green-500' },
@@ -1226,6 +1226,7 @@ saveToGoogleSheets(); // Aggiungi questa riga
                 switch (language) {
                     case 'JAP': return '🇯🇵';
                     case 'CHI': return '🇨🇳';
+                    case 'FRA': return '🇫🇷';
                     default: return '';
                 }
             };
