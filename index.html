@@ -1638,8 +1638,7 @@ if (isLoading) {
 </div>
 
 
-<div className={`transition-all duration-500 ease-in-out ${isMenuCollapsed ? 'max-h-0 opacity-0 overflow-hidden transform -translate-y-4' : 'max-h-96 opacity-100 transform translate-y-0'}`}>
-
+<div className={`transition-all duration-500 ease-in-out ${isMenuCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-96 opacity-100'}`}>
 <div className="mt-2 mb-4 sm:hidden">
   <button 
     onClick={toggleFullscreen}
@@ -1677,7 +1676,7 @@ if (isLoading) {
 
  
 {utilityPopupVisible && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
     <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
       <h2 className="text-xl font-bold mb-4 text-black">Utility</h2>
       <div className="grid grid-cols-2 gap-4">
@@ -1728,7 +1727,7 @@ if (isLoading) {
 )}
 
 {shopPopupVisible && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
     <div className="bg-white p-6 rounded-lg w-full max-w-md">
       <h2 className="text-xl font-bold mb-4 text-black">Cerca su Card Market</h2>
       <form onSubmit={handleShopSearch} className="space-y-4">
@@ -1790,7 +1789,7 @@ if (isLoading) {
 )}
 
 {comingSoonPopupVisible && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
     <div className="bg-white p-6 rounded-lg">
       <h2 className="text-xl font-bold mb-4 text-black">Coming Soon</h2>
       <p className="text-black mb-4">Nuove funzionalità in arrivo!</p>
