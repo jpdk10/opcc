@@ -1518,18 +1518,51 @@ if (isLoading) {
          <div className="mb-6">
   {/* Selettore del tema - solo per mobile, in alto a destra */}
   <div className="flex justify-end mb-2 sm:hidden">
-    <div className="flex items-center">
-      <label className={`mr-2 text-xs ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>Tema:</label>
-      <select 
-        value={theme} 
-        onChange={toggleTheme}
-        className="px-1 py-1 text-xs rounded text-black"
-      >
-        <option value="standard">Standard</option>
-        <option value="pink">Rosa</option>
-      </select>
+    <div className="flex items-center space-x-3">
+        {/* Pulsanti rapidi Google per mobile */}
+        <div className="flex items-center space-x-1">
+            {isSignedIn ? (
+                <div className="flex space-x-1">
+                    <button 
+                        onClick={loadFromGoogleSheets} 
+                        className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        title="Carica da Google Sheets"
+                    >
+                        📥
+                    </button>
+                    <button 
+                        onClick={saveToGoogleSheets} 
+                        className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        title="Salva su Google Sheets"
+                    >
+                        💾
+                    </button>
+                </div>
+            ) : (
+                <button 
+                    onClick={handleAuthClick} 
+                    className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                    title="Accedi a Google"
+                >
+                    🔐
+                </button>
+            )}
+        </div>
+        
+        {/* Selettore tema */}
+        <div className="flex items-center">
+            <label className={`mr-2 text-xs ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>Tema:</label>
+            <select 
+                value={theme} 
+                onChange={toggleTheme}
+                className="px-1 py-1 text-xs rounded text-black"
+            >
+                <option value="standard">Standard</option>
+                <option value="pink">Rosa</option>
+            </select>
+        </div>
     </div>
-  </div>
+</div>
 
   {/* Titolo e selettore del tema per desktop */}
   <div className="flex flex-col sm:flex-row justify-between items-center">
