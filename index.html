@@ -582,10 +582,14 @@ const pipZoomRef = React.useRef(1);
 const [pipZoomDisplay, setPipZoomDisplay] = React.useState(1);
 const [showPipControls, setShowPipControls] = React.useState(false);
 const pipUpdateFuncRef = React.useRef(null);
+const pipPanXRef = React.useRef(0);
+const pipPanYRef = React.useRef(0);
+const [pipPanXDisplay, setPipPanXDisplay] = React.useState(0);
+const [pipPanYDisplay, setPipPanYDisplay] = React.useState(0);
 
 const togglePictureInPicture = async () => {
   try {
-    if (document.pictureInPictureElement) {
+   if (document.pictureInPictureElement) {
   await document.exitPictureInPicture();
   if (pipIntervalRef.current) {
     clearInterval(pipIntervalRef.current);
@@ -593,6 +597,10 @@ const togglePictureInPicture = async () => {
   setShowPipControls(false);
   pipZoomRef.current = 1;
   setPipZoomDisplay(1);
+  pipPanXRef.current = 0;
+  pipPanYRef.current = 0;
+  setPipPanXDisplay(0);
+  setPipPanYDisplay(0);
   return;
 }
 
@@ -619,7 +627,7 @@ const togglePictureInPicture = async () => {
     const stream = canvas.captureStream(30);
     video.srcObject = stream;
     
-    const updatePiP = async () => {
+   const updatePiP = async () => {
   try {
     const root = document.getElementById('root');
     if (!root) return;
@@ -636,8 +644,11 @@ const togglePictureInPicture = async () => {
       removeContainer: true
     });
     
-    // USA LA REF che si aggiorna sempre
+    // Leggi zoom e pan dalle ref
     const currentZoom = pipZoomRef.current;
+    const currentPanX = pipPanXRef.current;
+    const currentPanY = pipPanYRef.current;
+    
     const scale = Math.min(
       canvas.width / screenshot.width,
       canvas.height / screenshot.height
@@ -645,8 +656,10 @@ const togglePictureInPicture = async () => {
     
     const w = screenshot.width * scale;
     const h = screenshot.height * scale;
-    const x = (canvas.width - w) / 2;
-    const y = (canvas.height - h) / 2;
+    
+    // Applica pan (spostamento)
+    const x = (canvas.width - w) / 2 + currentPanX;
+    const y = (canvas.height - h) / 2 + currentPanY;
     
     ctx.drawImage(screenshot, x, y, w, h);
     
@@ -672,6 +685,10 @@ const togglePictureInPicture = async () => {
   setShowPipControls(false);
   pipZoomRef.current = 1;
   setPipZoomDisplay(1);
+  pipPanXRef.current = 0;
+  pipPanYRef.current = 0;
+  setPipPanXDisplay(0);
+  setPipPanYDisplay(0);
 }, { once: true });
 
   } catch (error) {
@@ -687,6 +704,31 @@ const handlePipZoom = async (action) => {
   
   pipZoomRef.current = newZoom;
   setPipZoomDisplay(newZoom);
+  
+  // Forza aggiornamento immediato del PiP
+  if (pipUpdateFuncRef.current && document.pictureInPictureElement) {
+    await pipUpdateFuncRef.current();
+  }
+};
+
+const handlePipPan = async (direction) => {
+  const panStep = 50; // Pixel di spostamento
+  let newPanX = pipPanXRef.current;
+  let newPanY = pipPanYRef.current;
+  
+  if (direction === 'up') newPanY -= panStep;
+  if (direction === 'down') newPanY += panStep;
+  if (direction === 'left') newPanX -= panStep;
+  if (direction === 'right') newPanX += panStep;
+  if (direction === 'center') {
+    newPanX = 0;
+    newPanY = 0;
+  }
+  
+  pipPanXRef.current = newPanX;
+  pipPanYRef.current = newPanY;
+  setPipPanXDisplay(newPanX);
+  setPipPanYDisplay(newPanY);
   
   // Forza aggiornamento immediato del PiP
   if (pipUpdateFuncRef.current && document.pictureInPictureElement) {
@@ -2224,27 +2266,80 @@ setNewCard({
       <div className="text-white text-center font-bold mb-2">
         Controlli PiP
       </div>
-      <div className="text-white text-center text-sm mb-2">
-  Zoom: {pipZoomDisplay.toFixed(1)}x
-</div>
-      <button 
-        onClick={() => handlePipZoom('in')}
-        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-      >
-        🔍 Zoom +
-      </button>
-      <button 
-        onClick={() => handlePipZoom('out')}
-        className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-      >
-        🔍 Zoom -
-      </button>
-      <button 
-        onClick={() => handlePipZoom('reset')}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        ↺ Reset
-      </button>
+      
+      {/* Sezione Zoom */}
+      <div className="border-b border-gray-600 pb-2">
+        <div className="text-white text-center text-sm mb-2">
+          Zoom: {pipZoomDisplay.toFixed(1)}x
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          <button 
+            onClick={() => handlePipZoom('out')}
+            className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-xs"
+          >
+            🔍-
+          </button>
+          <button 
+            onClick={() => handlePipZoom('reset')}
+            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs"
+          >
+            1x
+          </button>
+          <button 
+            onClick={() => handlePipZoom('in')}
+            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
+          >
+            🔍+
+          </button>
+        </div>
+      </div>
+      
+      {/* Sezione Pan */}
+      <div className="border-b border-gray-600 pb-2">
+        <div className="text-white text-center text-xs mb-2">
+          Spostamento
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          <div></div>
+          <button 
+            onClick={() => handlePipPan('up')}
+            className="px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-xs"
+          >
+            ⬆️
+          </button>
+          <div></div>
+          
+          <button 
+            onClick={() => handlePipPan('left')}
+            className="px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-xs"
+          >
+            ⬅️
+          </button>
+          <button 
+            onClick={() => handlePipPan('center')}
+            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs"
+          >
+            ⊙
+          </button>
+          <button 
+            onClick={() => handlePipPan('right')}
+            className="px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-xs"
+          >
+            ➡️
+          </button>
+          
+          <div></div>
+          <button 
+            onClick={() => handlePipPan('down')}
+            className="px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-xs"
+          >
+            ⬇️
+          </button>
+          <div></div>
+        </div>
+      </div>
+      
+      {/* Pulsante chiudi */}
       <button 
         onClick={togglePictureInPicture}
         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
