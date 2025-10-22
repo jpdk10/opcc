@@ -11,6 +11,7 @@
     
 <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
         .scrolling-touch { -webkit-overflow-scrolling: touch; }
@@ -565,7 +566,6 @@ const toggleFullscreen = () => {
     }
   }
 };
-
 React.useEffect(() => {
   const handleFullscreenChange = () => {
     setIsFullscreen(!!document.fullscreenElement);
@@ -574,6 +574,111 @@ React.useEffect(() => {
   document.addEventListener('fullscreenchange', handleFullscreenChange);
   return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
 }, []);
+
+// Picture-in-Picture functionality
+const pipCanvasRef = React.useRef(null);
+const pipIntervalRef = React.useRef(null);
+
+const togglePictureInPicture = async () => {
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      if (pipIntervalRef.current) {
+        clearInterval(pipIntervalRef.current);
+      }
+      return;
+    }
+
+    // Crea un canvas per il PiP
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext('2d');
+
+    // Crea il video per il PiP
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    
+    const stream = canvas.captureStream(25);
+    video.srcObject = stream;
+    await video.play();
+
+    // Funzione per catturare e disegnare il contenuto
+    const updatePiP = async () => {
+      try {
+        const root = document.getElementById('root');
+        if (root) {
+          // Disegna sfondo nero
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Cattura screenshot
+          const screenshot = await html2canvas(root, {
+            scale: 0.4,
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+          });
+          
+          // Calcola dimensioni proporzionate
+          const scale = Math.min(
+            canvas.width / screenshot.width,
+            canvas.height / screenshot.height
+          );
+          const x = (canvas.width - screenshot.width * scale) / 2;
+          const y = (canvas.height - screenshot.height * scale) / 2;
+          
+          ctx.drawImage(
+            screenshot,
+            x, y,
+            screenshot.width * scale,
+            screenshot.height * scale
+          );
+        }
+      } catch (error) {
+        console.error('Errore aggiornamento PiP:', error);
+      }
+    };
+
+    // Avvia il PiP
+    await video.requestPictureInPicture();
+    
+    // Aggiorna ogni 500ms
+    pipIntervalRef.current = setInterval(updatePiP, 500);
+    updatePiP(); // Prima chiamata immediata
+
+    // Gestisci chiusura PiP
+    video.addEventListener('leavepictureinpicture', () => {
+      if (pipIntervalRef.current) {
+        clearInterval(pipIntervalRef.current);
+      }
+    });
+
+  } catch (error) {
+    console.error('Errore PiP:', error);
+    alert('Picture-in-Picture non supportato o bloccato dal browser. Prova con un browser diverso (Chrome/Edge consigliati).');
+  }
+};
+
+const openPopupWindow = () => {
+  const width = 800;
+  const height = 600;
+  const left = window.screen.width - width - 20;
+  const top = 20;
+  
+  const popupWindow = window.open(
+    window.location.href,
+    'OPCC_Popup',
+    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no,alwaysRaised=yes`
+  );
+  
+  if (popupWindow) {
+    popupWindow.focus();
+  } else {
+    alert('Popup bloccato! Abilita i popup per questo sito.');
+  }
+};
 
         const [utilityPopupVisible, setUtilityPopupVisible] = React.useState(false);
 const [shopPopupVisible, setShopPopupVisible] = React.useState(false);
@@ -1481,6 +1586,8 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 
 const [isLoading, setIsLoading] = React.useState(true);
 const [isMenuCollapsed, setIsMenuCollapsed] = React.useState(false);
+const [isPiPActive, setIsPiPActive] = React.useState(false);
+const pipVideoRef = React.useRef(null);
 
 
 
@@ -1639,12 +1746,24 @@ if (isLoading) {
 
 
 <div className={`transition-all duration-500 ease-in-out ${isMenuCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-96 opacity-100'}`}>
-<div className="mt-2 mb-4 sm:hidden">
+<div className="mt-2 mb-4 sm:hidden space-y-2">
   <button 
     onClick={toggleFullscreen}
     className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
   >
     {isFullscreen ? 'Esci da Fullscreen' : 'Vai a Fullscreen'}
+  </button>
+  <button 
+    onClick={togglePictureInPicture}
+    className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
+  >
+    📌 PiP Always-on-Top
+  </button>
+  <button 
+    onClick={openPopupWindow}
+    className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+  >
+    🪟 Finestra Popup
   </button>
 </div>
 
@@ -1705,16 +1824,27 @@ if (isLoading) {
             Card Market
           </a>
         </div>
-        <div className="space-y-2">
-          {/* Seconda colonna */}
-          <button 
-            onClick={togglePrintDialog}
-            className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
-          >
-            PRINT MISS
-          </button>
-          {/* Aggiungi qui altri pulsanti per la seconda colonna */}
-        </div>
+<div className="space-y-2">
+  {/* Seconda colonna */}
+  <button 
+    onClick={togglePrintDialog}
+    className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+  >
+    PRINT MISS
+  </button>
+  <button 
+    onClick={togglePictureInPicture}
+    className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
+  >
+    📌 PiP Always-on-Top
+  </button>
+  <button 
+    onClick={openPopupWindow}
+    className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+  >
+    🪟 Finestra Popup
+  </button>
+</div>
       </div>
       <button 
         onClick={() => setUtilityPopupVisible(false)}
