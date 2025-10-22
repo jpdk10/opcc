@@ -589,75 +589,92 @@ const togglePictureInPicture = async () => {
       return;
     }
 
+    // Verifica supporto PiP
+    if (!document.pictureInPictureEnabled) {
+      alert('Picture-in-Picture non è supportato su questo browser.');
+      return;
+    }
+
     // Crea un canvas per il PiP
     const canvas = document.createElement('canvas');
-    canvas.width = 640;
-    canvas.height = 480;
-    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     // Crea il video per il PiP
     const video = document.createElement('video');
     video.muted = true;
     video.playsInline = true;
+    video.autoplay = true;
     
-    const stream = canvas.captureStream(25);
-    video.srcObject = stream;
-    await video.play();
+    // Verifica che captureStream sia supportato
+    if (!canvas.captureStream) {
+      alert('captureStream non supportato. Usa Chrome o Edge.');
+      return;
+    }
 
+    const stream = canvas.captureStream(30); // 30 FPS
+    video.srcObject = stream;
+    
     // Funzione per catturare e disegnare il contenuto
     const updatePiP = async () => {
       try {
         const root = document.getElementById('root');
-        if (root) {
-          // Disegna sfondo nero
-          ctx.fillStyle = '#000000';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Cattura screenshot
-          const screenshot = await html2canvas(root, {
-            scale: 0.4,
-            logging: false,
-            useCORS: true,
-            allowTaint: true
-          });
-          
-          // Calcola dimensioni proporzionate
-          const scale = Math.min(
-            canvas.width / screenshot.width,
-            canvas.height / screenshot.height
-          );
-          const x = (canvas.width - screenshot.width * scale) / 2;
-          const y = (canvas.height - screenshot.height * scale) / 2;
-          
-          ctx.drawImage(
-            screenshot,
-            x, y,
-            screenshot.width * scale,
-            screenshot.height * scale
-          );
-        }
+        if (!root) return;
+
+        // Disegna sfondo
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Cattura con html2canvas
+        const screenshot = await html2canvas(root, {
+          scale: 0.3,
+          logging: false,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#000000',
+          removeContainer: true
+        });
+        
+        // Calcola dimensioni proporzionate
+        const scale = Math.min(
+          canvas.width / screenshot.width,
+          canvas.height / screenshot.height
+        );
+        const w = screenshot.width * scale;
+        const h = screenshot.height * scale;
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+        
+        ctx.drawImage(screenshot, x, y, w, h);
+        
       } catch (error) {
         console.error('Errore aggiornamento PiP:', error);
       }
     };
 
+    // Prima cattura
+    await updatePiP();
+    
+    // Aspetta che il video sia pronto
+    await video.play();
+    
     // Avvia il PiP
     await video.requestPictureInPicture();
     
-    // Aggiorna ogni 500ms
-    pipIntervalRef.current = setInterval(updatePiP, 500);
-    updatePiP(); // Prima chiamata immediata
+    // Aggiorna ogni secondo (più veloce causa lag)
+    pipIntervalRef.current = setInterval(updatePiP, 1000);
 
     // Gestisci chiusura PiP
     video.addEventListener('leavepictureinpicture', () => {
       if (pipIntervalRef.current) {
         clearInterval(pipIntervalRef.current);
       }
-    });
+    }, { once: true });
 
   } catch (error) {
     console.error('Errore PiP:', error);
-    alert('Picture-in-Picture non supportato o bloccato dal browser. Prova con un browser diverso (Chrome/Edge consigliati).');
+    alert('Errore nell\'attivare Picture-in-Picture: ' + error.message);
   }
 };
 
