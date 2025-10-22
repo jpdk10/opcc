@@ -578,103 +578,119 @@ React.useEffect(() => {
 // Picture-in-Picture functionality
 const pipCanvasRef = React.useRef(null);
 const pipIntervalRef = React.useRef(null);
+const pipZoomRef = React.useRef(1);
+const [pipZoomDisplay, setPipZoomDisplay] = React.useState(1);
+const [showPipControls, setShowPipControls] = React.useState(false);
+const pipUpdateFuncRef = React.useRef(null);
 
 const togglePictureInPicture = async () => {
   try {
     if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-      if (pipIntervalRef.current) {
-        clearInterval(pipIntervalRef.current);
-      }
-      return;
-    }
+  await document.exitPictureInPicture();
+  if (pipIntervalRef.current) {
+    clearInterval(pipIntervalRef.current);
+  }
+  setShowPipControls(false);
+  pipZoomRef.current = 1;
+  setPipZoomDisplay(1);
+  return;
+}
 
-    // Verifica supporto PiP
     if (!document.pictureInPictureEnabled) {
       alert('Picture-in-Picture non è supportato su questo browser.');
       return;
     }
 
-    // Crea un canvas per il PiP
     const canvas = document.createElement('canvas');
     canvas.width = 1200;
     canvas.height = 1800;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // Crea il video per il PiP
     const video = document.createElement('video');
     video.muted = true;
     video.playsInline = true;
     video.autoplay = true;
     
-    // Verifica che captureStream sia supportato
     if (!canvas.captureStream) {
       alert('captureStream non supportato. Usa Chrome o Edge.');
       return;
     }
 
-    const stream = canvas.captureStream(30); // 30 FPS
+    const stream = canvas.captureStream(30);
     video.srcObject = stream;
     
-    // Funzione per catturare e disegnare il contenuto
     const updatePiP = async () => {
-      try {
-        const root = document.getElementById('root');
-        if (!root) return;
+  try {
+    const root = document.getElementById('root');
+    if (!root) return;
 
-        // Disegna sfondo
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Cattura con html2canvas
-        const screenshot = await html2canvas(root, {
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#000000',
-          removeContainer: true
-        });
-        
-        // Calcola dimensioni proporzionate
-        const scale = Math.min(
-          canvas.width / screenshot.width,
-          canvas.height / screenshot.height
-        );
-        const w = screenshot.width * scale;
-        const h = screenshot.height * scale;
-        const x = (canvas.width - w) / 2;
-        const y = (canvas.height - h) / 2;
-        
-        ctx.drawImage(screenshot, x, y, w, h);
-        
-      } catch (error) {
-        console.error('Errore aggiornamento PiP:', error);
-      }
-    };
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const screenshot = await html2canvas(root, {
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#000000',
+      removeContainer: true
+    });
+    
+    // USA LA REF che si aggiorna sempre
+    const currentZoom = pipZoomRef.current;
+    const scale = Math.min(
+      canvas.width / screenshot.width,
+      canvas.height / screenshot.height
+    ) * currentZoom;
+    
+    const w = screenshot.width * scale;
+    const h = screenshot.height * scale;
+    const x = (canvas.width - w) / 2;
+    const y = (canvas.height - h) / 2;
+    
+    ctx.drawImage(screenshot, x, y, w, h);
+    
+  } catch (error) {
+    console.error('Errore aggiornamento PiP:', error);
+  }
+};
 
-    // Prima cattura
+    pipUpdateFuncRef.current = updatePiP;
+
     await updatePiP();
-    
-    // Aspetta che il video sia pronto
     await video.play();
-    
-    // Avvia il PiP
     await video.requestPictureInPicture();
     
-    // Aggiorna ogni secondo (più veloce causa lag)
+    setShowPipControls(true);
+    
     pipIntervalRef.current = setInterval(updatePiP, 5000);
 
-    // Gestisci chiusura PiP
     video.addEventListener('leavepictureinpicture', () => {
-      if (pipIntervalRef.current) {
-        clearInterval(pipIntervalRef.current);
-      }
-    }, { once: true });
+  if (pipIntervalRef.current) {
+    clearInterval(pipIntervalRef.current);
+  }
+  setShowPipControls(false);
+  pipZoomRef.current = 1;
+  setPipZoomDisplay(1);
+}, { once: true });
 
   } catch (error) {
     console.error('Errore PiP:', error);
     alert('Errore nell\'attivare Picture-in-Picture: ' + error.message);
+  }
+};
+const handlePipZoom = async (action) => {
+  let newZoom = pipZoomRef.current;
+  if (action === 'in') newZoom = Math.min(newZoom + 0.2, 3);
+  if (action === 'out') newZoom = Math.max(newZoom - 0.2, 0.5);
+  if (action === 'reset') newZoom = 1;
+  
+  pipZoomRef.current = newZoom;
+  setPipZoomDisplay(newZoom);
+  
+  // Forza aggiornamento immediato del PiP
+  if (pipUpdateFuncRef.current && document.pictureInPictureElement) {
+    await pipUpdateFuncRef.current();
   }
 };
 
@@ -2201,6 +2217,43 @@ setNewCard({
         togglePrintDialog();
     }}
 />
+
+{showPipControls && (
+  <div className="fixed bottom-4 right-4 bg-gray-900 border-2 border-blue-500 rounded-lg p-4 shadow-2xl z-[10000]">
+    <div className="flex flex-col space-y-2">
+      <div className="text-white text-center font-bold mb-2">
+        Controlli PiP
+      </div>
+      <div className="text-white text-center text-sm mb-2">
+  Zoom: {pipZoomDisplay.toFixed(1)}x
+</div>
+      <button 
+        onClick={() => handlePipZoom('in')}
+        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        🔍 Zoom +
+      </button>
+      <button 
+        onClick={() => handlePipZoom('out')}
+        className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+      >
+        🔍 Zoom -
+      </button>
+      <button 
+        onClick={() => handlePipZoom('reset')}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        ↺ Reset
+      </button>
+      <button 
+        onClick={togglePictureInPicture}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        ✕ Chiudi PiP
+      </button>
+    </div>
+  </div>
+)}
 
                 </div>
             );
