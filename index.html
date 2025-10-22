@@ -597,8 +597,8 @@ const togglePictureInPicture = async () => {
 
     // Crea un canvas per il PiP
     const canvas = document.createElement('canvas');
-    canvas.width = 1920;
-    canvas.height = 1080;
+    canvas.width = 640;
+    canvas.height = 480;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     // Crea il video per il PiP
