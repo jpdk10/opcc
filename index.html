@@ -834,6 +834,14 @@ const [comingSoonPopupVisible, setComingSoonPopupVisible] = React.useState(false
         const [shopVisible, setShopVisible] = React.useState(false);
 
         const [isMenuVisible, setIsMenuVisible] = React.useState(false);
+        const [activeSection, setActiveSection] = React.useState('mancolista'); // 'mancolista' o 'wishlist'
+const [wishlistItems, setWishlistItems] = React.useState([]);
+const [newWishlistItem, setNewWishlistItem] = React.useState({
+    id: null,
+    name: '',
+    image: null,
+    notes: ''
+});
 
           
 const selectedCollection = 'OP Card Collection';
@@ -2095,14 +2103,36 @@ if (isLoading) {
 )}
 
                   <div className="mb-4">
-                  
-                  
     <button 
         onClick={() => setIsMenuVisible(!isMenuVisible)}
         className="w-full px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-950 transition-colors mb-2"
     >
         {isMenuVisible ? 'Chiudi MENU' : 'Apri MENU'}
     </button>
+    
+    {/* NUOVI PULSANTI MANCOLISTA/WISHLIST */}
+    <div className="grid grid-cols-2 gap-2 mb-4">
+        <button 
+            onClick={() => setActiveSection('mancolista')}
+            className={`px-4 py-2 text-white rounded transition-colors ${
+                activeSection === 'mancolista' 
+                    ? 'bg-blue-600 hover:bg-blue-700' 
+                    : 'bg-gray-600 hover:bg-gray-700'
+            }`}
+        >
+            MANCOLISTA
+        </button>
+        <button 
+            onClick={() => setActiveSection('wishlist')}
+            className={`px-4 py-2 text-white rounded transition-colors ${
+                activeSection === 'wishlist' 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-gray-600 hover:bg-gray-700'
+            }`}
+        >
+            WISHLIST
+        </button>
+    </div>
     
     {isMenuVisible && (
         <div className="flex flex-wrap gap-2">
@@ -2197,6 +2227,9 @@ setNewCard({
                             />
                         </div>
                     )}
+                    {/* SEZIONE MANCOLISTA */}
+{activeSection === 'mancolista' && (
+<div>
                       <div className="mb-4">
                 <input
                     type="text"
@@ -2307,6 +2340,142 @@ setNewCard({
     />
 )}
             <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
+            </div>
+)}
+{/* FINE SEZIONE MANCOLISTA */}
+{/* SEZIONE WISHLIST */}
+{activeSection === 'wishlist' && (
+<div>
+    {/* Selettore Vista */}
+    <div className="mb-4 flex justify-center items-center">
+        <div className="flex items-center space-x-2">
+            <span className={`text-sm ${theme === 'standard' ? 'text-white' : 'text-pink-800'}`}>Vista:</span>
+            <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1 rounded text-sm ${
+                    viewMode === 'grid' 
+                        ? 'bg-purple-500 text-white' 
+                        : 'bg-gray-200 text-black hover:bg-gray-300'
+                }`}
+            >
+                Griglia
+            </button>
+            <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1 rounded text-sm ${
+                    viewMode === 'list' 
+                        ? 'bg-purple-500 text-white' 
+                        : 'bg-gray-200 text-black hover:bg-gray-300'
+                }`}
+            >
+                Elenco
+            </button>
+        </div>
+    </div>
+
+    {/* Griglia/Lista Wishlist */}
+    {viewMode === 'grid' ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {wishlistItems.map((item) => (
+                <div 
+                    key={item.id}
+                    className="bg-purple-600 rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer"
+                >
+                    <div className="relative pt-[100%] w-full mt-4">
+                        {item.image && (
+                            <img 
+                                src={item.image} 
+                                alt={item.name} 
+                                className="absolute top-0 left-0 w-full h-full object-contain"
+                            />
+                        )}
+                    </div>
+                    <div className="p-4 flex-grow">
+                        <h3 className="font-bold text-lg mb-2 text-white text-shadow">
+                            {item.name.toUpperCase()}
+                        </h3>
+                        {item.notes && (
+                            <p className="text-sm text-white text-shadow">{item.notes}</p>
+                        )}
+                    </div>
+                    <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // Funzione edit da implementare
+                            }} 
+                            className="text-white mr-2 hover:text-blue-300 text-shadow"
+                        >
+                            Edit
+                        </button>
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setWishlistItems(wishlistItems.filter(i => i.id !== item.id));
+                            }} 
+                            className="text-white hover:text-red-300 text-shadow"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    ) : (
+        <div className="space-y-4">
+            {wishlistItems.map((item) => (
+                <div 
+                    key={item.id}
+                    className="bg-purple-600 rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex cursor-pointer p-4"
+                >
+                    <div className="flex-shrink-0 w-20 h-28 mr-4">
+                        {item.image ? (
+                            <img 
+                                src={item.image} 
+                                alt={item.name} 
+                                className="w-full h-full object-contain rounded"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
+                                <span className="text-xs text-gray-600">No Image</span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex-grow">
+                        <h3 className="font-bold text-lg text-white text-shadow mb-2">
+                            {item.name.toUpperCase()}
+                        </h3>
+                        {item.notes && (
+                            <p className="text-sm text-white text-shadow">{item.notes}</p>
+                        )}
+                    </div>
+                    <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // Funzione edit da implementare
+                            }} 
+                            className="text-white mr-2 hover:text-blue-300 text-shadow"
+                        >
+                            Edit
+                        </button>
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setWishlistItems(wishlistItems.filter(i => i.id !== item.id));
+                            }} 
+                            className="text-white hover:text-red-300 text-shadow"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )}
+</div>
+)}
+{/* FINE SEZIONE WISHLIST */}
             {selectedCard && (
                 <CardDetails card={selectedCard} onClose={handleCloseCardDetails} />
             )}
