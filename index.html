@@ -1057,17 +1057,26 @@ function updateSigninStatus(isSignedIn) {
 async function saveToGoogleSheets() {
     if (!tokenClient) {
         console.error('Token client not initialized');
+        alert('Devi prima effettuare il login con Google');
         return;
     }
 
+    setIsSaving(true);
+    
     try {
+        console.log('Inizio salvataggio su Google Sheets...');
+        
         const token = await new Promise((resolve, reject) => {
-            tokenClient.callback = (response) => {
+            const callback = (response) => {
                 if (response.error !== undefined) {
+                    console.error('Errore nel token:', response.error);
                     reject(response);
+                    return;
                 }
+                console.log('Token ottenuto con successo');
                 resolve(response.access_token);
             };
+            tokenClient.callback = callback;
             tokenClient.requestAccessToken({prompt: ''});
         });
 
@@ -1116,8 +1125,10 @@ const values = cards.map(card => [
 
         const responseData = await response.json();
         console.log('Save successful. Response:', responseData);
+        setIsSaving(false);
 
     } catch (error) {
+        setIsSaving(false);
         console.error('Detailed error in saving to Google Sheets:', error);
         if (error.response) {
             const errorText = await error.response.text();
@@ -1508,7 +1519,15 @@ updatedCards.sort((a, b) => {
     
         
       setCards(updatedCards);
-        saveToGoogleSheets();
+        
+        // Salva su Google Sheets in modo asincrono
+        saveToGoogleSheets().then(() => {
+            console.log('Carte salvate con successo su Google Sheets');
+        }).catch((error) => {
+            console.error('Errore nel salvataggio su Google Sheets:', error);
+            alert('Errore nel salvataggio automatico. Usa il pulsante "Salva su Google Sheets" manualmente.');
+        });
+
 setNewCard({
     id: null,
     name: '',
@@ -1808,6 +1827,7 @@ const filteredCards = Array.isArray(cards) ? cards.filter(card =>
 
 const [isLoading, setIsLoading] = React.useState(true);
 const [isMenuCollapsed, setIsMenuCollapsed] = React.useState(false);
+const [isSaving, setIsSaving] = React.useState(false);
 const [isPiPActive, setIsPiPActive] = React.useState(false);
 const pipVideoRef = React.useRef(null);
 
@@ -1907,7 +1927,7 @@ if (isLoading) {
   {/* Titolo e selettore del tema per desktop */}
   <div className="flex flex-col sm:flex-row justify-between items-center">
     <h1 className={`text-3xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow text-center sm:text-left mb-2 sm:mb-0`}>
-        OP CARD COLLECTION
+        OP CARD COLLECTION {isSaving && <span className="text-yellow-400 text-sm ml-2">💾 Salvataggio...</span>}
     </h1>
          {/* Selettore del tema e pulsanti rapidi - solo per desktop */}
     <div className="hidden sm:flex items-center space-x-3">
