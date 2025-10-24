@@ -2376,19 +2376,19 @@ setNewCard({
 
             
              <div className="mb-6 pt-4 border-2 border-t-amber-400 border-r-0 border-l-0 border-b-0"> {/* Aumentato il margine inferiore */}
-                <div className="overflow-x-auto scrolling-touch mb-2 pb-2"> {/* Aggiunto margine inferiore */}
-                    <div className="flex whitespace-nowrap">
-                        {initialSetOptions.map((set) => (
-                            <button
-                                key={set}
-                                onClick={() => setActiveSet(set)}
-                                className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
-                            >
-                                {set}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <div className="overflow-x-auto scrolling-touch mb-2 pb-2">
+    <div className="flex whitespace-nowrap">
+        {setOptions.map((set) => (
+            <button
+                key={set}
+                onClick={() => setActiveSet(set)}
+                className={`mr-2 px-3 py-1 rounded flex-shrink-0 ${activeSet === set ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+            >
+                {set}
+            </button>
+        ))}
+    </div>
+</div>
                
             </div>
 
