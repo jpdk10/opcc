@@ -289,19 +289,19 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
                             </div>
                         ) : (
                           <select
-            name="set"
-            value={card.set}
-            onChange={handleSetChange}
-            className="w-full px-3 py-2 border rounded text-black"
-          >
-            <option value="">Seleziona un set</option>
-            {setOptions.filter(set => set !== 'ALL').map((option) => (
-  <option key={option} value={option}>
-    {getSetIcon(option)} {option}
-  </option>
-))}
-            <option value="add_custom">Aggiungi altro...</option>
-          </select>
+    name="set"
+    value={card.set}
+    onChange={handleSetChange}
+    className="w-full px-3 py-2 border rounded text-black"
+>
+    <option value="">Seleziona un set</option>
+    {setOptions.filter(set => set !== 'ALL').map((option) => (
+        <option key={option} value={option}>
+            {getSetIcon(option)} {option}
+        </option>
+    ))}
+    <option value="add_custom">Aggiungi altro...</option>
+</select>
         )}
       </div>
       
@@ -2365,7 +2365,7 @@ setNewCard({
     <div className="flex-1 text-center px-4">
         {activeSet !== 'ALL' && (
     <h2 className={`text-xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>
-        {getSetName(activeSet, setNamesFromSheets)}
+        {setNamesFromSheets[activeSet] || defaultSetNames[activeSet] || activeSet}
     </h2>
 )}
     </div>
