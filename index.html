@@ -1340,7 +1340,10 @@ async function loadFromGoogleSheets() {
                 setIsExportDialogOpen(false);
             };
             
-            const togglePrintDialog = () => setIsPrintDialogOpen(!isPrintDialogOpen);
+            const togglePrintDialog = () => {
+    setIsPrintDialogOpen(!isPrintDialogOpen);
+    setUtilityPopupVisible(false); // Chiudi il popup UTILITY quando apri il dialogo di stampa
+};
 
 const handleSetSelection = (set) => {
     setSelectedSetsToPrint(prev => 
