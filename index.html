@@ -1139,40 +1139,71 @@ async function loadFromGoogleSheets() {
         });
 
         const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
-const range = 'Andrea!A1:O'
-        const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`, {
+        
+        // Carica le carte
+        const rangeCards = 'Andrea!A1:O';
+        const responseCards = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeCards}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to load from Google Sheets');
+        if (!responseCards.ok) {
+            throw new Error('Failed to load cards from Google Sheets');
         }
 
-        const data = await response.json();
-        console.log('Raw data from Google Sheets:', data.values);
+        const dataCards = await responseCards.json();
+        console.log('Raw data from Google Sheets (Cards):', dataCards.values);
 
-const loadedCards = data.values.slice(1).map((row, index) => ({
-     id: row[0] || `${Date.now()}-${index}`,
-    name: row[1] || '',
-    set: row[2] || '',
-    cardNumber: row[3] || '',
-    version: row[4] || '',
-    language: row[5] || 'ENG',
-    image: row[6] || null,
-    color: row[7] || '',
-    notes: row[8] || '',
-    special: row[9] === 'Yes',  // AGGIUNGERE QUESTA RIGA
-    favorite: row[10] === 'Yes',  // AGGIORNARE INDICE da 9 a 10
-    ogSet: row[11] || '',  // AGGIORNARE INDICE da 10 a 11
-    ogCardNumber: row[12] || '',  // AGGIORNARE INDICE da 11 a 12
-    isDon: row[13] === 'Yes'  // AGGIORNARE INDICE da 12 a 13
-}));
+        const loadedCards = dataCards.values.slice(1).map((row, index) => ({
+            id: row[0] || `${Date.now()}-${index}`,
+            name: row[1] || '',
+            set: row[2] || '',
+            cardNumber: row[3] || '',
+            version: row[4] || '',
+            language: row[5] || 'ENG',
+            image: row[6] || null,
+            color: row[7] || '',
+            notes: row[8] || '',
+            special: row[9] === 'Yes',
+            favorite: row[10] === 'Yes',
+            ogSet: row[11] || '',
+            ogCardNumber: row[12] || '',
+            isDon: row[13] === 'Yes'
+        }));
 
         console.log('Loaded cards:', loadedCards);
-
         setCards(loadedCards);
+        
+        // Carica la wishlist
+        const rangeWishlist = 'Wishlist!A2:K';
+        const responseWishlist = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeWishlist}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (responseWishlist.ok) {
+            const dataWishlist = await responseWishlist.json();
+            console.log('Raw data from Google Sheets (Wishlist):', dataWishlist.values);
+
+            const loadedWishlist = dataWishlist.values.map((row) => ({
+                id: row[0] || '',
+                name: row[1] || '',
+                notes: row[2] || '',
+                link1: row[3] || '',
+                link2: row[4] || '',
+                link3: row[5] || '',
+                link4: row[6] || '',
+                link5: row[7] || '',
+                link6: row[8] || '',
+                image: row[9] || null
+            }));
+
+            console.log('Loaded wishlist:', loadedWishlist);
+            setWishlistItems(loadedWishlist);
+        }
+        
         console.log('Data loaded from Google Sheets');
     } catch (error) {
         console.error('Error loading from Google Sheets:', error);
@@ -2375,103 +2406,62 @@ setNewCard({
 
     {/* Griglia/Lista Wishlist */}
     {viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {wishlistItems.map((item) => (
-                <div 
-                    key={item.id}
-                    className="bg-purple-600 rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer"
-                >
-                    <div className="relative pt-[100%] w-full mt-4">
-                        {item.image && (
-                            <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="absolute top-0 left-0 w-full h-full object-contain"
-                            />
-                        )}
-                    </div>
-                    <div className="p-4 flex-grow">
-                        <h3 className="font-bold text-lg mb-2 text-white text-shadow">
-                            {item.name.toUpperCase()}
-                        </h3>
-                        {item.notes && (
-                            <p className="text-sm text-white text-shadow">{item.notes}</p>
-                        )}
-                    </div>
-                    <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
-                        <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Funzione edit da implementare
-                            }} 
-                            className="text-white mr-2 hover:text-blue-300 text-shadow"
-                        >
-                            Edit
-                        </button>
-                        <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setWishlistItems(wishlistItems.filter(i => i.id !== item.id));
-                            }} 
-                            className="text-white hover:text-red-300 text-shadow"
-                        >
-                            Delete
-                        </button>
-                    </div>
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {wishlistItems.map((item) => (
+            <div 
+                key={item.id}
+                className="bg-transparent rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex flex-col cursor-pointer"
+                onClick={() => setSelectedCard(item)}
+            >
+                <div className="relative pt-[100%] w-full mt-4">
+                    {item.image && (
+                        <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            className="absolute top-0 left-0 w-full h-full object-contain"
+                        />
+                    )}
                 </div>
-            ))}
-        </div>
-    ) : (
+                <div className="p-4 flex-grow">
+                    <h3 className="font-bold text-lg mb-2 text-white text-shadow text-center">
+                        {item.name.toUpperCase()}
+                    </h3>
+                </div>
+            </div>
+        ))}
+    </div>
+) : (
         <div className="space-y-4">
-            {wishlistItems.map((item) => (
-                <div 
-                    key={item.id}
-                    className="bg-purple-600 rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex cursor-pointer p-4"
-                >
-                    <div className="flex-shrink-0 w-20 h-28 mr-4">
-                        {item.image ? (
-                            <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="w-full h-full object-contain rounded"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
-                                <span className="text-xs text-gray-600">No Image</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex-grow">
-                        <h3 className="font-bold text-lg text-white text-shadow mb-2">
-                            {item.name.toUpperCase()}
-                        </h3>
-                        {item.notes && (
-                            <p className="text-sm text-white text-shadow">{item.notes}</p>
-                        )}
-                    </div>
-                    <div className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-50 z-20">
-                        <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Funzione edit da implementare
-                            }} 
-                            className="text-white mr-2 hover:text-blue-300 text-shadow"
-                        >
-                            Edit
-                        </button>
-                        <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setWishlistItems(wishlistItems.filter(i => i.id !== item.id));
-                            }} 
-                            className="text-white hover:text-red-300 text-shadow"
-                        >
-                            Delete
-                        </button>
-                    </div>
+        {wishlistItems.map((item) => (
+            <div 
+                key={item.id}
+                className="bg-transparent rounded-lg shadow-md overflow-hidden group transition-all duration-300 ease-in-out flex cursor-pointer p-4"
+                onClick={() => setSelectedCard(item)}
+            >
+                <div className="flex-shrink-0 w-20 h-28 mr-4">
+                    {item.image ? (
+                        <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            className="w-full h-full object-contain rounded"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
+                            <span className="text-xs text-gray-600">No Image</span>
+                        </div>
+                    )}
                 </div>
-            ))}
-        </div>
+                <div className="flex-grow">
+                    <h3 className="font-bold text-lg text-white text-shadow mb-2">
+                        {item.name.toUpperCase()}
+                    </h3>
+                    {item.notes && (
+                        <p className="text-sm text-white text-shadow">{item.notes}</p>
+                    )}
+                </div>
+            </div>
+        ))}
+    </div>
     )}
 </div>
 )}
@@ -2638,22 +2628,88 @@ setNewCard({
         window.open(googleSearchUrl, '_blank');
     };
 
+    // Controlla se è un item della wishlist
+    const isWishlistItem = !card.set && !card.cardNumber;
+
+    if (isWishlistItem) {
+        // Popup per wishlist
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
+                <div className="bg-gray-800 p-6 rounded-lg w-full max-w-xs border-2 border-gray-300 max-h-[90vh] overflow-y-auto">
+                    {card.image && (
+                        <img src={card.image} alt={card.name} className="max-w-full h-auto mb-4" />
+                    )}
+                    <div className="space-y-3 text-sm">
+                        <div>
+                            <span className="font-bold text-white">Nome Prodotto:</span>
+                            <p className="text-white">{card.name}</p>
+                        </div>
+                        
+                        {card.notes && (
+                            <div>
+                                <span className="font-bold text-white">Note:</span>
+                                <p className="text-white">{card.notes}</p>
+                            </div>
+                        )}
+                        
+                        <div>
+                            <span className="font-bold text-white">Link:</span>
+                            <div className="flex flex-col space-y-1 mt-1">
+                                {card.link1 && (
+                                    <a href={card.link1} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 1
+                                    </a>
+                                )}
+                                {card.link2 && (
+                                    <a href={card.link2} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 2
+                                    </a>
+                                )}
+                                {card.link3 && (
+                                    <a href={card.link3} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 3
+                                    </a>
+                                )}
+                                {card.link4 && (
+                                    <a href={card.link4} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 4
+                                    </a>
+                                )}
+                                {card.link5 && (
+                                    <a href={card.link5} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 5
+                                    </a>
+                                )}
+                                {card.link6 && (
+                                    <a href={card.link6} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                                        Link 6
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Popup per carte (codice originale)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={handleOutsideClick}>
             <div className="bg-gray-800 p-6 rounded-lg w-full max-w-xs border-2 border-gray-300">
                 <h2 className="text-xl font-bold mb-4 text-white">{card.name}</h2>
-               <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-    <p><span className="font-bold">Set:</span> {card.set}</p>
-    <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
-    <p><span className="font-bold">Versione:</span> {card.version}</p>
-    <p><span className="font-bold">Lingua:</span> {card.language}</p>
-    <p><span className="font-bold">Colore:</span> {getColorName(card.color)}</p>
-    <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
-<p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
-    <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
-    {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
-    {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
-</div>
+                <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                    <p><span className="font-bold">Set:</span> {card.set}</p>
+                    <p><span className="font-bold">Numero:</span> {card.cardNumber}</p>
+                    <p><span className="font-bold">Versione:</span> {card.version}</p>
+                    <p><span className="font-bold">Lingua:</span> {card.language}</p>
+                    <p><span className="font-bold">Colore:</span> {getColorName(card.color)}</p>
+                    <p><span className="font-bold">Special:</span> {card.special ? 'Sì' : 'No'}</p>
+                    <p><span className="font-bold">Preferito:</span> {card.favorite ? '⭐' : 'No'}</p>
+                    <p><span className="font-bold">DON!!:</span> {card.isDon ? 'Sì' : 'No'}</p>
+                    {card.ogSet && <p><span className="font-bold">Set Originale:</span> {card.ogSet}</p>}
+                    {card.ogCardNumber && <p><span className="font-bold">Numero Originale:</span> {card.ogCardNumber}</p>}
+                </div>
                 {card.notes && (
                     <div className="mb-4">
                         <h3 className="text-lg font-semibold mb-2 text-white">Note:</h3>
