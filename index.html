@@ -125,7 +125,7 @@
     { name: 'GIALLO', value: 'bg-yellow-400', class: 'yellow-400' }
 ];
 
-const setNames = {
+const defaultSetNames = {
     'OP01': 'Romance Dawn',
     'OP02': 'Paramount War',
     'OP03': 'Pillars of Strength',
@@ -149,6 +149,11 @@ const setNames = {
     'Winner': 'Winner Cards',
     'Special Tournament': 'Special Tournament',
     'Pre-Release': 'Pre-Release Cards'
+};
+
+// Funzione helper per ottenere il nome del set
+const getSetName = (setCode, setNamesFromSheets) => {
+    return setNamesFromSheets[setCode] || defaultSetNames[setCode] || setCode;
 };
 
 // Genera tutte le combinazioni + colori singoli + special
@@ -291,10 +296,10 @@ const CardForm = ({ card, onInputChange, onImageChange, onSubmit, onCancel, setO
           >
             <option value="">Seleziona un set</option>
             {setOptions.filter(set => set !== 'ALL').map((option) => (
-              <option key={option} value={option}>
-                {getSetIcon(option)} {option}
-              </option>
-            ))}
+  <option key={option} value={option}>
+    {getSetIcon(option)} {option}
+  </option>
+))}
             <option value="add_custom">Aggiungi altro...</option>
           </select>
         )}
@@ -873,6 +878,8 @@ const [newCard, setNewCard] = React.useState({
     const [searchTerm, setSearchTerm] = React.useState('');
     const [isFormVisible, setIsFormVisible] = React.useState(false);
     const [setOptions, setSetOptions] = React.useState(initialSetOptions);
+    const [setNamesFromSheets, setSetNamesFromSheets] = React.useState({});
+
     const [loadedFileName, setLoadedFileName] = React.useState(null);
     const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false);
     const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
@@ -1139,6 +1146,40 @@ async function loadFromGoogleSheets() {
 
         const spreadsheetId = '13fqpfjx91d6Ke99LVIofbTZr_goA8dQdmNUPTPjcDsQ';
         
+        // CARICA I SET DAL FOGLIO "Sets"
+        const rangeSets = 'Sets!A2:B';
+        const responseSets = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeSets}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (responseSets.ok) {
+            const dataSets = await responseSets.json();
+            console.log('Raw data from Google Sheets (Sets):', dataSets.values);
+
+            if (dataSets.values && dataSets.values.length > 0) {
+                // Crea l'oggetto setNames dai dati del foglio
+                const loadedSetNames = {};
+                const loadedSetOptions = ['ALL']; // Mantieni ALL come prima opzione
+
+                dataSets.values.forEach(row => {
+                    if (row[0]) { // Se c'è un valore nella colonna Set
+                        loadedSetOptions.push(row[0]);
+                        if (row[1]) { // Se c'è anche il nome del set
+                            loadedSetNames[row[0]] = row[1];
+                        }
+                    }
+                });
+
+                console.log('Loaded set options:', loadedSetOptions);
+                console.log('Loaded set names:', loadedSetNames);
+
+                setSetOptions(loadedSetOptions);
+                setSetNamesFromSheets(loadedSetNames);
+            }
+        }
+        
         // Carica le carte
         const rangeCards = 'Andrea!A1:O';
         const responseCards = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeCards}`, {
@@ -1208,8 +1249,6 @@ async function loadFromGoogleSheets() {
         console.error('Error loading from Google Sheets:', error);
     }
 }
-
-
 
 
  
@@ -2324,11 +2363,11 @@ setNewCard({
     
     {/* Titolo collezione centrale */}
     <div className="flex-1 text-center px-4">
-        {activeSet !== 'ALL' && setNames[activeSet] && (
-            <h2 className={`text-xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>
-                {setNames[activeSet]}
-            </h2>
-        )}
+        {activeSet !== 'ALL' && (
+    <h2 className={`text-xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>
+        {getSetName(activeSet, setNamesFromSheets)}
+    </h2>
+)}
     </div>
     
     <div className="w-20"></div> {/* Spaziatore per bilanciare il layout */}
