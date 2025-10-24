@@ -59,6 +59,49 @@
 .combo-yellow-400-blue-500 { background: linear-gradient(90deg, #facc15 50%, #3b82f6 50%); }
 .combo-yellow-400-purple-500 { background: linear-gradient(90deg, #facc15 50%, #a855f7 50%); }
 .combo-yellow-400-gray-700 { background: linear-gradient(90deg, #facc15 50%, #374151 50%); }
+
+
+/* Tooltip personalizzati */
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 10000;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4b5563;
+}
+
+.custom-tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
+}
+
+.custom-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
     </style>
 </head>
 <body>
@@ -1762,44 +1805,90 @@ if (isLoading) {
     <h1 className={`text-3xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow text-center sm:text-left mb-2 sm:mb-0`}>
         OP CARD COLLECTION
     </h1>
-    {/* Selettore del tema e pulsanti rapidi - solo per desktop */}
+         {/* Selettore del tema e pulsanti rapidi - solo per desktop */}
     <div className="hidden sm:flex items-center space-x-3">
+        {/* Pulsante Fullscreen */}
+        <div className="custom-tooltip">
+            <button 
+                onClick={toggleFullscreen}
+                className="px-2 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+            >
+                ⛶
+            </button>
+            <span className="tooltip-text">{isFullscreen ? "Esci da Fullscreen" : "Entra in Fullscreen"}</span>
+        </div>
+        
+        {/* Pulsante PiP */}
+        <div className="custom-tooltip">
+            <button 
+                onClick={togglePictureInPicture}
+                className="px-2 py-1 text-xs bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
+            >
+                📌
+            </button>
+            <span className="tooltip-text">Picture-in-Picture Always-on-Top</span>
+        </div>
+        
+        {/* Pulsante Popup */}
+        <div className="custom-tooltip">
+            <button 
+                onClick={openPopupWindow}
+                className="px-2 py-1 text-xs bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+            >
+                🪟
+            </button>
+            <span className="tooltip-text">Apri Finestra Popup</span>
+        </div>
+        
+        {/* Separatore visuale */}
+        <div className={`w-px h-4 ${theme === 'standard' ? 'bg-white' : 'bg-pink-800'} opacity-50`}></div>
+        
         {/* Pulsanti rapidi Google */}
         <div className="flex items-center space-x-2">
             {isSignedIn ? (
                 <div className="flex space-x-1">
-                    <button 
-                        onClick={loadFromGoogleSheets} 
-                        className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                        title="Carica da Google Sheets"
-                    >
-                        📥
-                    </button>
-                    <button 
-                        onClick={saveToGoogleSheets} 
-                        className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                        title="Salva su Google Sheets"
-                    >
-                        💾
-                    </button>
+                    <div className="custom-tooltip">
+                        <button 
+                            onClick={loadFromGoogleSheets} 
+                            className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        >
+                            📥
+                        </button>
+                        <span className="tooltip-text">Carica da Google Sheets</span>
+                    </div>
+                    <div className="custom-tooltip">
+                        <button 
+                            onClick={saveToGoogleSheets} 
+                            className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
+                            💾
+                        </button>
+                        <span className="tooltip-text">Salva su Google Sheets</span>
+                    </div>
                 </div>
             ) : (
-                <button 
-                    onClick={handleAuthClick} 
-                    className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                    title="Accedi a Google"
-                >
-                    🔐
-                </button>
+                <div className="custom-tooltip">
+                    <button 
+                        onClick={handleAuthClick} 
+                        className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                    >
+                        🔐
+                    </button>
+                    <span className="tooltip-text">Accedi con Google</span>
+                </div>
             )}
         </div>
-        <button 
-        onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
-        className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-        title={isMenuCollapsed ? "Mostra menu" : "Nascondi menu"}
-    >
-        💀
-    </button>
+        
+        {/* Pulsante Menu Collapse */}
+        <div className="custom-tooltip">
+            <button 
+                onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
+                className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+            >
+                💀
+            </button>
+            <span className="tooltip-text">{isMenuCollapsed ? "Mostra menu" : "Nascondi menu"}</span>
+        </div>
         
         {/* Separatore visuale */}
         <div className={`w-px h-4 ${theme === 'standard' ? 'bg-white' : 'bg-pink-800'} opacity-50`}></div>
@@ -1821,26 +1910,7 @@ if (isLoading) {
 
 
 <div className={`transition-all duration-500 ease-in-out ${isMenuCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-96 opacity-100'}`}>
-<div className="mt-2 mb-4 sm:hidden space-y-2">
-  <button 
-    onClick={toggleFullscreen}
-    className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
-  >
-    {isFullscreen ? 'Esci da Fullscreen' : 'Vai a Fullscreen'}
-  </button>
-  <button 
-    onClick={togglePictureInPicture}
-    className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
-  >
-    📌 PiP Always-on-Top
-  </button>
-  <button 
-    onClick={openPopupWindow}
-    className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
-  >
-    🪟 Finestra Popup
-  </button>
-</div>
+
 
 
 
@@ -1907,18 +1977,7 @@ if (isLoading) {
   >
     PRINT MISS
   </button>
-  <button 
-    onClick={togglePictureInPicture}
-    className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
-  >
-    📌 PiP Always-on-Top
-  </button>
-  <button 
-    onClick={openPopupWindow}
-    className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
-  >
-    🪟 Finestra Popup
-  </button>
+  
 </div>
       </div>
       <button 
