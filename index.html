@@ -125,6 +125,33 @@
     { name: 'GIALLO', value: 'bg-yellow-400', class: 'yellow-400' }
 ];
 
+const setNames = {
+    'OP01': 'Romance Dawn',
+    'OP02': 'Paramount War',
+    'OP03': 'Pillars of Strength',
+    'OP04': 'Kingdoms of Intrigue',
+    'OP05': 'Awakening of the New Era',
+    'OP06': 'Wings of the Captain',
+    'OP07': 'Five Hundred Years in the Future',
+    'OP08': 'Two Legends',
+    'OP09': 'The Four Emperors',
+    'OP10': 'Absolute Justice',
+    'OP11': 'Paramount War Plus',
+    'OP12': 'Zoro and Sanji',
+    'OP13': 'Unknown',
+    'EB01': 'Memorial Collection',
+    'EB02': 'Nami Set',
+    'PRB01': 'Premium Booster',
+    'PRB02': 'Premium Booster 2',
+    'Promo': 'Promotional Cards',
+    'Unnumbered Promo': 'Unnumbered Promotional',
+    'Judge Promo': 'Judge Promotional',
+    'Winner': 'Winner Cards',
+    'Special Tournament': 'Special Tournament',
+    'Pre-Release': 'Pre-Release Cards',
+    'Super Pre-Release': 'Super Pre-Release Cards'
+};
+
 // Genera tutte le combinazioni + colori singoli + special
 const generateColorOptions = () => {
     const options = [];
@@ -2231,6 +2258,17 @@ setNewCard({
             Elenco
         </button>
     </div>
+    
+    {/* Titolo collezione centrale */}
+    <div className="flex-1 text-center px-4">
+        {activeSet !== 'ALL' && setNames[activeSet] && (
+            <h2 className={`text-xl font-bold ${theme === 'standard' ? 'text-white' : 'text-pink-800'} text-shadow`}>
+                {setNames[activeSet]}
+            </h2>
+        )}
+    </div>
+    
+    <div className="w-20"></div> {/* Spaziatore per bilanciare il layout */}
 </div>
 
 
