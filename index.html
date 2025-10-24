@@ -132,24 +132,23 @@ const setNames = {
     'OP04': 'Kingdoms of Intrigue',
     'OP05': 'Awakening of the New Era',
     'OP06': 'Wings of the Captain',
-    'OP07': 'Five Hundred Years in the Future',
+    'OP07': '500 Years in the Future',
     'OP08': 'Two Legends',
-    'OP09': 'The Four Emperors',
-    'OP10': 'Absolute Justice',
-    'OP11': 'Paramount War Plus',
-    'OP12': 'Zoro and Sanji',
-    'OP13': 'Unknown',
+    'OP09': 'Emperors in the New World',
+    'OP10': 'Royal Blood',
+    'OP11': 'A Fist of Divine Speed',
+    'OP12': 'Legacy of the Master',
+    'OP13': 'Carrying on His Will',
     'EB01': 'Memorial Collection',
-    'EB02': 'Nami Set',
-    'PRB01': 'Premium Booster',
-    'PRB02': 'Premium Booster 2',
-    'Promo': 'Promotional Cards',
+    'EB02': 'Anime 25th Collection',
+    'PRB01': 'THE BEST Vol.1',
+    'PRB02': 'THE BEST Vol.2',
+    'Promo': 'Promo',
     'Unnumbered Promo': 'Unnumbered Promotional',
     'Judge Promo': 'Judge Promotional',
     'Winner': 'Winner Cards',
     'Special Tournament': 'Special Tournament',
-    'Pre-Release': 'Pre-Release Cards',
-    'Super Pre-Release': 'Super Pre-Release Cards'
+    'Pre-Release': 'Pre-Release Cards'
 };
 
 // Genera tutte le combinazioni + colori singoli + special
@@ -553,7 +552,7 @@ const getSetIcon = (set) => {
     return '🔴'; // Icona rossa
   } else if (set.startsWith('ST')) {
     return '🔵'; // Icona blu
-  } else if (['Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'].includes(set)) {
+  } else if (['Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release'].includes(set)) {
     return '⚪'; // Icona pallino bianco
   }
   return '';
@@ -1427,7 +1426,7 @@ React.useEffect(() => {
              const setOrder = [
                 'OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'OP10', 'OP11', 'OP12', 'OP13',  
                 'EB01', 'EB02', 'PRB01', 'PRB02' ,  
-                'Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release', 'Super Pre-Release'
+                'Promo', 'Unnumbered Promo', 'Judge Promo', 'Winner', 'Special Tournament', 'Pre-Release'
             ];
 
            const versionOrder = ['V1', 'V2', 'V3'];
